@@ -20,5 +20,12 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 
-# vercel
+# vercel / netlify
 .vercel
+.netlify
+
+# leads capturados por el bot
+data/leads.json
+
+# Local Netlify folder
+.netlify

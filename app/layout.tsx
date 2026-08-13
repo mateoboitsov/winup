@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import SiteNav from "@/components/SiteNav";
+import LenisSmoothScroll from "@/components/LenisSmoothScroll";
+import ConversionBot from "@/components/ConversionBot";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -10,8 +12,8 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "Spiral",
-  description: "3D spiral showcase",
+  title: "winup.",
+  description: "Agencia digital. Branding, motion y fotografía",
 };
 
 export default function RootLayout({
@@ -23,7 +25,9 @@ export default function RootLayout({
     <html lang="es" className={bricolage.variable}>
       <body className={bricolage.className}>
         <SiteNav />
+        <LenisSmoothScroll />
         {children}
+        <ConversionBot />
       </body>
     </html>
   );

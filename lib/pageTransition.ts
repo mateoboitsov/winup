@@ -13,7 +13,8 @@ export const pageTransition = {
 const EXIT_DURATION = 1.3;
 const ENTER_DURATION = 0.8;
 const EASE = "power3.inOut";
-const PAGE_BG = "#1a1a1a";
+const PAGE_BG = "#0e0e0e";
+const DEBUG_STACKING = process.env.NODE_ENV !== "production";
 
 /** Última navegación pedida mientras hay una transición en curso (no se apilan). */
 let queued: { router: RouterLike; href: string } | null = null;
@@ -137,10 +138,89 @@ function tryFinishTransition() {
   document.documentElement.classList.remove("is-page-transitioning");
   clearTransitionLayers();
 
-  // Quitar z-index elevado de la página entrante (tras acabar ambas animaciones)
+  // Restaurar el z-index original de la(s) página(s) que entraron.
+  // Evitamos tocar el z-index de cualquier otra página para que la UI
+  // fija (vignette/selector) en la espiral no se quede por detrás.
   document.querySelectorAll<HTMLElement>("[data-page]").forEach((el) => {
-    el.style.zIndex = "";
+    if (el.dataset.pageTransitionOrigZIndex != null) {
+      // En home (espiral), bajar de 45 -> 35 al finalizar estaba provocando
+      // un reordenado visual (UI de viñeta/toggle quedaba "debajo").
+      // Conservamos el z-index elevado en esa página para evitar el salto.
+      if (el.getAttribute("data-page") === "spiral") {
+        delete el.dataset.pageTransitionOrigZIndex;
+        return;
+      }
+      el.style.zIndex = el.dataset.pageTransitionOrigZIndex;
+      delete el.dataset.pageTransitionOrigZIndex;
+    }
   });
+
+  if (DEBUG_STACKING && typeof window !== "undefined") {
+    const spiralPage = document.querySelector<HTMLElement>('[data-page="spiral"]');
+    if (spiralPage) {
+      const vignette = spiralPage.querySelector<HTMLElement>(".vignette");
+      const viewToggle = spiralPage.querySelector<HTMLElement>(".view-toggle");
+      const canvas = spiralPage.querySelector<HTMLCanvasElement>("canvas");
+      const mountParent = canvas?.parentElement as HTMLElement | null;
+      const vpW = window.innerWidth;
+      const vpH = window.innerHeight;
+      const probeBottomRight = document.elementFromPoint(vpW - 24, vpH - 24);
+      const probeCenter = document.elementFromPoint(vpW / 2, vpH / 2);
+
+      // Log mínimo pero suficiente para detectar el “quién está por encima”.
+      // (Si el bug persiste, quiero ver qué z-index calculado tiene cada uno.)
+      const payload = {
+        at: "finish",
+        activePage: spiralPage.getAttribute("data-page"),
+        spiralPageZ_inline: spiralPage.style.zIndex,
+        spiralPageZ_computed: getComputedStyle(spiralPage).zIndex,
+        spiralPagePos: getComputedStyle(spiralPage).position,
+        spiralPageOpacity: getComputedStyle(spiralPage).opacity,
+        spiralPageVisibility: getComputedStyle(spiralPage).visibility,
+        spiralPageDisplay: getComputedStyle(spiralPage).display,
+        vignette: vignette
+          ? {
+              opacity_inline: vignette.style.opacity,
+              opacity_computed: getComputedStyle(vignette).opacity,
+              display: getComputedStyle(vignette).display,
+              visibility: getComputedStyle(vignette).visibility,
+              z_inline: vignette.style.zIndex,
+              z_computed: getComputedStyle(vignette).zIndex,
+            }
+          : null,
+        viewToggle: viewToggle
+          ? {
+              z_inline: viewToggle.style.zIndex,
+              z_computed: getComputedStyle(viewToggle).zIndex,
+              opacity: getComputedStyle(viewToggle).opacity,
+              display: getComputedStyle(viewToggle).display,
+              visibility: getComputedStyle(viewToggle).visibility,
+              pointerEvents: getComputedStyle(viewToggle).pointerEvents,
+              rect: viewToggle.getBoundingClientRect().toJSON(),
+            }
+          : null,
+        mountParent: mountParent
+          ? {
+              z_inline: mountParent.style.zIndex,
+              z_computed: getComputedStyle(mountParent).zIndex,
+              opacity: getComputedStyle(mountParent).opacity,
+              display: getComputedStyle(mountParent).display,
+              visibility: getComputedStyle(mountParent).visibility,
+            }
+          : null,
+        probe: {
+          bottomRightTag: probeBottomRight?.tagName ?? null,
+          bottomRightClass: probeBottomRight?.className ?? null,
+          centerTag: probeCenter?.tagName ?? null,
+          centerClass: probeCenter?.className ?? null,
+        },
+      };
+      // eslint-disable-next-line no-console
+      console.log("[pageTransition] stack@finish", payload);
+      // eslint-disable-next-line no-console
+      console.log("[pageTransition] stack@finish:json", JSON.stringify(payload));
+    }
+  }
 
   if (failsafeId != null) {
     clearTimeout(failsafeId);
@@ -187,9 +267,15 @@ export function navigateWithPageTransition(router: RouterLike, href: string) {
   activeRouter = router;
   // Si salimos de un proyecto con esta transición, no dejar morph inverso pendiente
   transition.active = false;
+
+  // Snapshot con el scroll actual; luego subimos y bloqueamos overflow
+  const outgoing = snapshotPage(page);
+  page.style.visibility = "hidden";
+  page.style.pointerEvents = "none";
+
+  window.scrollTo(0, 0);
   document.documentElement.classList.add("is-page-transitioning");
 
-  const outgoing = snapshotPage(page);
   router.push(href);
 
   if (failsafeId != null) clearTimeout(failsafeId);
@@ -234,11 +320,32 @@ export function playPageEnter(el: HTMLElement) {
 
   pageTransition.pendingEnter = false;
 
-  // Encima de la salida (nav sigue en 50). Se resetea al terminar toda la transición.
-  el.style.zIndex = "45";
-  el.style.position = "relative";
+  window.scrollTo(0, 0);
 
-  // zoomInUp = inverso del zoomOutDown (mismo origen inferior, sin fade)
+  // Fijar al viewport durante la entrada: si no, scale + origin bottom
+  // usan toda la altura del documento (hero+manifiesto+cta) y la página
+  // parece crecer a medias y luego “salta” al soltar el transform.
+  el.style.visibility = "visible";
+  el.style.pointerEvents = "none";
+  if (DEBUG_STACKING && typeof window !== "undefined") {
+    // eslint-disable-next-line no-console
+    console.log("[pageTransition] playPageEnter", {
+      dataPage: el.getAttribute("data-page"),
+      z_inline_before: el.style.zIndex,
+    });
+  }
+  if (el.dataset.pageTransitionOrigZIndex === undefined) {
+    el.dataset.pageTransitionOrigZIndex = el.style.zIndex;
+  }
+  el.style.zIndex = "45";
+  el.style.position = "fixed";
+  el.style.left = "0";
+  el.style.top = "0";
+  el.style.width = "100%";
+  el.style.height = "100vh";
+  el.style.maxHeight = "100vh";
+  el.style.overflow = "hidden";
+
   gsap.killTweensOf(el);
   gsap.fromTo(
     el,
@@ -256,8 +363,35 @@ export function playPageEnter(el: HTMLElement) {
       overwrite: true,
       immediateRender: true,
       onComplete: () => {
-        // Mantener capa 3D; no clearProps (parpadeo WebGL)
+        window.scrollTo(0, 0);
+        // Dejamos la animación en su estado final y luego limpiamos transform:
+        // si queda un transform residual en [data-page], los hijos `position: fixed`
+        // (como el toggle de la espiral) pasan a posicionarse respecto a ese
+        // contenedor transformado y "saltan" fuera del viewport.
         gsap.set(el, { y: 0, scale: 1, force3D: true });
+        gsap.set(el, { clearProps: "transform" });
+
+        // Al volver a home, aseguramos que la viñeta quede visible
+        // aunque hubiese quedado algún tween previo sobre ".vignette".
+        if (el.getAttribute("data-page") === "spiral") {
+          const vignette = el.querySelector<HTMLElement>(".vignette");
+          if (vignette) gsap.set(vignette, { opacity: 1 });
+        }
+
+        const isSpiral = el.getAttribute("data-page") === "spiral";
+
+        el.style.position = "relative";
+        el.style.left = "";
+        el.style.top = "";
+        // Importante: en la home (espiral) casi todos los hijos están fuera del
+        // flujo (absolute/fixed). Si quitamos `height`, el contenedor colapsa a 0
+        // y la viñeta (inset:0) "desaparece".
+        el.style.width = isSpiral ? "100vw" : "";
+        el.style.height = isSpiral ? "100vh" : "";
+        el.style.maxHeight = "";
+        el.style.overflow = isSpiral ? "hidden" : "";
+        el.style.pointerEvents = "";
+
         markEnterDone();
       },
     }

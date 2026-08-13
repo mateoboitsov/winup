@@ -30,6 +30,7 @@ const PARAMS = {
   autoScrollSpeed: 0.0025,
   shadowBase: 0.32,
   shadowHover: 0.55,
+  limeHover: 0.55,
   exitDist: 15,
   exitSpeed: 1.7,
   exitStagger: 0.1,
@@ -60,6 +61,11 @@ export default function Spiral() {
     transition.active ? coverUrl(transition.projectId) : null
   );
   const [vignetteStart] = useState(() => (transition.active ? 0 : 1));
+  const introRef = useRef({
+    yOffset: 0,
+    spinOffset: 0,
+    speedBoost: 1,
+  });
 
   const stateRef = useRef({
     scrollPos: 0,
@@ -214,16 +220,25 @@ export default function Spiral() {
       return tex;
     }
 
-    const textureReady: boolean[] = PROJECTS_DATA.map(() => false);
-    const cachedTextures: THREE.Texture[] = PROJECTS_DATA.map(() => {
-      // Placeholder 1×1 hasta que cargue la cover reescalada
+    function createHiddenPlaceholderTexture() {
       const canvas = document.createElement("canvas");
       canvas.width = 1;
       canvas.height = 1;
-      const tex = new THREE.CanvasTexture(canvas);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      return tex;
-    });
+      const ctx = canvas.getContext("2d")!;
+      ctx.clearRect(0, 0, 1, 1);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.generateMipmaps = false;
+      texture.needsUpdate = true;
+      return texture;
+    }
+
+    const placeholderTexture = createHiddenPlaceholderTexture();
+
+    const textureReady: boolean[] = PROJECTS_DATA.map(() => false);
+    const cachedTextures: THREE.Texture[] = PROJECTS_DATA.map(() => placeholderTexture);
 
     function createSoftShadowTexture(size: number) {
       const canvas = document.createElement("canvas");
@@ -252,6 +267,8 @@ export default function Spiral() {
     const poolSize = 18;
     const cardMeshes: THREE.Mesh[] = [];
 
+    const LIME = 0xc8ff00;
+
     for (let i = 0; i < poolSize; i++) {
       const material = new THREE.MeshBasicMaterial({
         map: cachedTextures[i % PROJECTS_DATA.length],
@@ -261,6 +278,28 @@ export default function Spiral() {
         alphaTest: 0.5,
       });
       const mesh = new THREE.Mesh(cardGeometry, material);
+
+      const limeMat = new THREE.MeshBasicMaterial({
+        color: LIME,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        depthTest: true,
+        toneMapped: false,
+        fog: false,
+        alphaMap: roundedAlphaMap,
+        // alphaTest bajo: con opacity < 0.5, un alphaTest de 0.5 descartaba toda la capa
+        alphaTest: 0.05,
+        side: THREE.DoubleSide,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+        polygonOffsetUnits: -2,
+      });
+      const limeOverlay = new THREE.Mesh(cardGeometry, limeMat);
+      limeOverlay.position.z = 0.03;
+      limeOverlay.renderOrder = 2;
+      limeOverlay.raycast = () => {};
+      mesh.add(limeOverlay);
 
       const shadowMat = new THREE.MeshBasicMaterial({
         map: shadowTex,
@@ -279,10 +318,31 @@ export default function Spiral() {
         data: null,
         shadow: shadowMesh,
         shadowMat,
+        limeMat,
         shadowBaseOpacity: PARAMS.shadowBase,
       };
       cardsGroup.add(mesh);
       cardMeshes.push(mesh);
+    }
+
+    function revealInCascadeFromCenter(mesh: THREE.Mesh, tex: THREE.Texture) {
+      const mat = mesh.material as THREE.MeshBasicMaterial;
+      const dist = Math.abs(((mesh.userData.virtIdx as number) ?? 0) - stateRef.current.scrollPos);
+      const delay = Math.min(dist * 0.045, 0.75);
+      mat.map = tex;
+      mat.transparent = true;
+      mat.opacity = 0;
+      mat.needsUpdate = true;
+      gsap.to(mat, {
+        opacity: 1,
+        duration: 0.6,
+        delay,
+        ease: "power2.out",
+        overwrite: true,
+        onComplete: () => {
+          mat.transparent = false;
+        },
+      });
     }
 
     // Carga covers reescaladas tras crear el pool (evita carrera con caché del navegador)
@@ -293,17 +353,14 @@ export default function Spiral() {
       img.crossOrigin = "anonymous";
       img.decoding = "async";
       img.onload = () => {
-        const prev = cachedTextures[i]!;
         const next = textureFromImage(img, img.naturalWidth, img.naturalHeight);
         cachedTextures[i] = next;
+        const loadedProjectId = data.id;
         cardMeshes.forEach((mesh) => {
-          const mat = mesh.material as THREE.MeshBasicMaterial;
-          if (mat.map === prev) {
-            mat.map = next;
-            mat.needsUpdate = true;
-          }
+          const meshData = mesh.userData.data as Project | null;
+          if (meshData?.id !== loadedProjectId) return;
+          revealInCascadeFromCenter(mesh, next);
         });
-        prev.dispose();
         textureReady[i] = true;
       };
       img.src = coverUrl(data.id);
@@ -440,6 +497,7 @@ export default function Spiral() {
     function layoutCards(sPos: number, mode: GalleryView = viewModeRef.current) {
       const len = PROJECTS_DATA.length;
       const g = groupPose(sPos, mode);
+      const intro = introRef.current;
 
       cardMeshes.forEach((mesh, i) => {
         const virtIdx = formulaVirtIdx(i, sPos);
@@ -448,8 +506,12 @@ export default function Spiral() {
           mesh.userData.virtIdx = virtIdx;
           const dataIdx = ((virtIdx % len) + len) % len;
           mesh.userData.data = PROJECTS_DATA[dataIdx];
-          (mesh.material as THREE.MeshBasicMaterial).map = cachedTextures[dataIdx];
-          (mesh.material as THREE.MeshBasicMaterial).needsUpdate = true;
+          const mat = mesh.material as THREE.MeshBasicMaterial;
+          const ready = textureReady[dataIdx];
+          mat.map = cachedTextures[dataIdx];
+          mat.transparent = !ready;
+          mat.opacity = ready ? 1 : 0;
+          mat.needsUpdate = true;
         }
 
         const pose = poseForVirt(virtIdx, sPos, mode);
@@ -465,8 +527,8 @@ export default function Spiral() {
         shadow.visible = mode === "grid";
       });
 
-      cardsGroup.rotation.y = g.groupRotY;
-      cardsGroup.position.y = g.groupY;
+      cardsGroup.rotation.y = g.groupRotY + intro.spinOffset;
+      cardsGroup.position.y = g.groupY + intro.yOffset;
     }
 
     function switchView(mode: GalleryView) {
@@ -695,6 +757,8 @@ export default function Spiral() {
       // Congelar escala de hover para que el morph parta del tamaño real de la tarjeta
       gsap.killTweensOf(mesh.scale);
       mesh.scale.set(1, 1, 1);
+      gsap.killTweensOf(mesh.userData.limeMat);
+      (mesh.userData.limeMat as THREE.MeshBasicMaterial).opacity = 0;
 
       const curved = viewModeRef.current === "spiral";
       const { mesh: hero, setCurvature, setRadius } = createHero(
@@ -941,6 +1005,16 @@ export default function Spiral() {
     let downX = 0;
     let downY = 0;
 
+    const isNavUIEventTarget = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false;
+      // Importante: el componente de la espiral escucha eventos a nivel `window`,
+      // así que al clicar en el menú también podría disparar `openProject()`.
+      // Para evitarlo, ignoramos interacciones que vengan del propio `SiteNav`.
+      return !!target.closest(
+        ".site-nav-bar, #nav-services-submenu, .nav-submenu, .nav-services-overlay, .view-toggle"
+      );
+    };
+
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (viewMorphing || transitioningRef.current) return;
@@ -968,6 +1042,7 @@ export default function Spiral() {
 
     const handleMouseUp = (e: MouseEvent) => {
       stateRef.current.isDragging = false;
+      if (isNavUIEventTarget(e.target)) return;
       const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
       if (moved < CLICK_THRESHOLD && !transitioningRef.current && !viewMorphing && currentHoveredMesh) {
         const data = currentHoveredMesh.userData.data as Project | null;
@@ -996,6 +1071,7 @@ export default function Spiral() {
 
     const handleTouchEnd = (e: TouchEvent) => {
       stateRef.current.isDragging = false;
+      if (isNavUIEventTarget(e.target)) return;
       const t = e.changedTouches[0];
       if (!t) return;
       const moved = Math.hypot(t.clientX - downX, t.clientY - downY);
@@ -1033,7 +1109,7 @@ export default function Spiral() {
       }
 
       if (!stateRef.current.isDragging) {
-        stateRef.current.targetScroll += PARAMS.autoScrollSpeed;
+        stateRef.current.targetScroll += PARAMS.autoScrollSpeed * introRef.current.speedBoost;
       }
 
       stateRef.current.scrollPos += (stateRef.current.targetScroll - stateRef.current.scrollPos) * 0.08;
@@ -1053,6 +1129,12 @@ export default function Spiral() {
             ease: "power2.out",
             overwrite: true,
           });
+          gsap.to(currentHoveredMesh.userData.limeMat, {
+            opacity: 0,
+            duration: 0.4,
+            ease: "power2.out",
+            overwrite: true,
+          });
         }
         currentHoveredMesh = targetMesh;
         if (currentHoveredMesh) {
@@ -1060,6 +1142,12 @@ export default function Spiral() {
           currentHoveredMesh.userData.shadowBaseOpacity = PARAMS.shadowHover;
           gsap.to(currentHoveredMesh.userData.shadowMat, {
             opacity: PARAMS.shadowHover,
+            duration: 0.4,
+            ease: "power2.out",
+            overwrite: true,
+          });
+          gsap.to(currentHoveredMesh.userData.limeMat, {
+            opacity: PARAMS.limeHover,
             duration: 0.4,
             ease: "power2.out",
             overwrite: true,
@@ -1081,10 +1169,98 @@ export default function Spiral() {
 
     layoutCards(0, initialMode);
 
+    function playSpiralIntro() {
+      // Entrada: desde abajo + giro rápido inicial, luego se asienta al centro.
+      introRef.current.yOffset = 14;
+      introRef.current.spinOffset = Math.PI * 11.5;
+      // Durante la intro, dejamos el auto-scroll base casi neutral para evitar
+      // choque de direcciones y que el frenado se sienta "en seco".
+      introRef.current.speedBoost = 0;
+
+      const intro = { t: 0 };
+      gsap.to(intro, {
+        t: 1,
+        duration: 2.4,
+        ease: "power4.out",
+        onUpdate: () => {
+          const k = 1 - intro.t;
+          // Cola más larga para que el frenado final sea más suave.
+          introRef.current.yOffset = 14 * Math.pow(k, 1.35);
+          introRef.current.spinOffset = Math.PI * 11.5 * Math.pow(k, 1.45);
+          introRef.current.speedBoost = 1 - Math.pow(k, 1.2);
+        },
+        onComplete: () => {
+          introRef.current.yOffset = 0;
+          introRef.current.spinOffset = 0;
+          introRef.current.speedBoost = 1;
+        },
+      });
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      const spiralPage = pageRef.current;
+      const vignette = spiralPage?.querySelector<HTMLElement>(".vignette") ?? null;
+      const viewToggle = spiralPage?.querySelector<HTMLElement>(".view-toggle") ?? null;
+      const canvas = mountRef.current?.querySelector<HTMLCanvasElement>("canvas") ?? null;
+      const vpW = window.innerWidth;
+      const vpH = window.innerHeight;
+      const probeBottomRight = document.elementFromPoint(vpW - 24, vpH - 24);
+      const probeCenter = document.elementFromPoint(vpW / 2, vpH / 2);
+      const payload = {
+        transitionActive: transition.active,
+        viewMode_initial: initialMode,
+        spiralZ_inline: spiralPage?.style.zIndex ?? null,
+        spiralZ_computed: spiralPage ? getComputedStyle(spiralPage).zIndex : null,
+        spiralDisplay: spiralPage ? getComputedStyle(spiralPage).display : null,
+        spiralVisibility: spiralPage ? getComputedStyle(spiralPage).visibility : null,
+        spiralOpacity: spiralPage ? getComputedStyle(spiralPage).opacity : null,
+        vignette: vignette
+          ? {
+              opacity_inline: vignette.style.opacity,
+              opacity_computed: getComputedStyle(vignette).opacity,
+              display: getComputedStyle(vignette).display,
+              visibility: getComputedStyle(vignette).visibility,
+              z_inline: vignette.style.zIndex,
+              z_computed: getComputedStyle(vignette).zIndex,
+            }
+          : null,
+        viewToggle: viewToggle
+          ? {
+              z_inline: viewToggle.style.zIndex,
+              z_computed: getComputedStyle(viewToggle).zIndex,
+              opacity: getComputedStyle(viewToggle).opacity,
+              display: getComputedStyle(viewToggle).display,
+              visibility: getComputedStyle(viewToggle).visibility,
+              pointerEvents: getComputedStyle(viewToggle).pointerEvents,
+              rect: viewToggle.getBoundingClientRect().toJSON(),
+            }
+          : null,
+        canvas: canvas
+          ? {
+              canvasZ_computed: getComputedStyle(canvas).zIndex,
+              canvasPos: getComputedStyle(canvas).position,
+              canvasOpacity: getComputedStyle(canvas).opacity,
+            }
+          : null,
+        probe: {
+          bottomRightTag: probeBottomRight?.tagName ?? null,
+          bottomRightClass: probeBottomRight?.className ?? null,
+          centerTag: probeCenter?.tagName ?? null,
+          centerClass: probeCenter?.className ?? null,
+        },
+      };
+
+      // eslint-disable-next-line no-console
+      console.log("[Spiral] mount stack", payload);
+      // eslint-disable-next-line no-console
+      console.log("[Spiral] mount stack:json", JSON.stringify(payload));
+    }
+
     if (transition.active) {
       startReverse();
     } else {
       document.body.style.background = "#000";
+      playSpiralIntro();
     }
 
     animate();
@@ -1116,6 +1292,7 @@ export default function Spiral() {
       gsap.killTweensOf(cardsGroup.scale);
       gsap.killTweensOf(cardsGroup.rotation);
       gsap.killTweensOf(cardsGroup.position);
+      gsap.killTweensOf(introRef.current);
       gsap.killTweensOf(camera.position);
       if (scene.fog) gsap.killTweensOf(scene.fog);
       cardMeshes.forEach((m) => {
@@ -1124,11 +1301,19 @@ export default function Spiral() {
         gsap.killTweensOf(m.position);
         gsap.killTweensOf(m.rotation);
         gsap.killTweensOf(m.userData.shadowMat);
+        gsap.killTweensOf(m.userData.limeMat);
         gsap.killTweensOf(m.userData.shadow.position);
+        const mat = m.material as THREE.MeshBasicMaterial;
+        mat.opacity = 1;
+        mat.transparent = false;
         (m.material as THREE.MeshBasicMaterial).dispose();
         (m.userData.shadowMat as THREE.MeshBasicMaterial).dispose();
+        (m.userData.limeMat as THREE.MeshBasicMaterial).dispose();
       });
-      cachedTextures.forEach((t) => t.dispose());
+      cachedTextures.forEach((t) => {
+        if (t !== placeholderTexture) t.dispose();
+      });
+      placeholderTexture.dispose();
       roundedAlphaMap.dispose();
       shadowTex.dispose();
       shadowGeometry.dispose();
@@ -1204,7 +1389,8 @@ export default function Spiral() {
     <div
       ref={pageRef}
       data-page="spiral"
-      style={{ position: "relative", width: "100vw", height: "100vh", background: "#1a1a1a", overflow: "hidden", zIndex: 35 }}
+      className="spiral-ui"
+      style={{ position: "relative", width: "100vw", height: "100vh", background: "var(--bg-soft)", overflow: "hidden", zIndex: 35 }}
     >
       {reverseBg && (
         <img
@@ -1249,17 +1435,12 @@ export default function Spiral() {
       {/* Toggle espiral ↔ grid */}
       {!transitioning && (
         <div
+          className="view-toggle"
           style={{
             position: "fixed",
             bottom: "2rem",
             right: "clamp(1.5rem, 5vw, 4.5rem)",
             zIndex: 40,
-            display: "flex",
-            gap: "0.35rem",
-            padding: "0.3rem",
-            background: "rgba(255,255,255,0.08)",
-            borderRadius: "12px",
-            backdropFilter: "blur(10px)",
             pointerEvents: "auto",
           }}
         >
@@ -1272,17 +1453,6 @@ export default function Spiral() {
               setViewMode("spiral");
               switchViewRef.current?.("spiral");
             }}
-            style={{
-              border: "none",
-              cursor: "pointer",
-              padding: "0.55rem 0.95rem",
-              borderRadius: "9px",
-              background: viewMode === "spiral" ? "#fff" : "transparent",
-              color: viewMode === "spiral" ? "#000" : "rgba(255,255,255,0.7)",
-              font: "inherit",
-              letterSpacing: "inherit",
-              transition: "background 0.25s ease, color 0.25s ease",
-            }}
           >
             Espiral
           </button>
@@ -1294,17 +1464,6 @@ export default function Spiral() {
               if (viewMode === "grid" || transitioning) return;
               setViewMode("grid");
               switchViewRef.current?.("grid");
-            }}
-            style={{
-              border: "none",
-              cursor: "pointer",
-              padding: "0.55rem 0.95rem",
-              borderRadius: "9px",
-              background: viewMode === "grid" ? "#fff" : "transparent",
-              color: viewMode === "grid" ? "#000" : "rgba(255,255,255,0.7)",
-              font: "inherit",
-              letterSpacing: "inherit",
-              transition: "background 0.25s ease, color 0.25s ease",
             }}
           >
             Grid
@@ -1328,21 +1487,13 @@ export default function Spiral() {
         <div className="content-width">
           {displayProject && (
             <>
-              <p className="ui-label" style={{ marginBottom: "0.2rem" }}>
+              <p
+                className="ui-label"
+                style={{ marginBottom: "0.35rem", color: "var(--accent)" }}
+              >
                 {displayProject.category} · {displayProject.year}
               </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontWeight: 800,
-                  fontSize: "clamp(1.25rem, 2.5vw, 2rem)",
-                  lineHeight: 1.1,
-                  letterSpacing: "-0.05em",
-                  color: "#fff",
-                }}
-              >
-                {displayProject.title}
-              </p>
+              <p className="hover-project-title">{displayProject.title}</p>
             </>
           )}
         </div>

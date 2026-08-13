@@ -5,33 +5,127 @@ import { useRouter } from "next/navigation";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ArrowRight } from "lucide-react";
-import { getNextProject, coverUrl, type Project } from "@/lib/projects";
+import { getNextProject, coverUrl, assetUrl, type Project } from "@/lib/projects";
 import { transition } from "@/lib/transition";
+import SiteFooter from "@/components/SiteFooter";
+import VerticalVideoCarousel, { type ReelItem } from "@/components/VerticalVideoCarousel";
 
 gsap.registerPlugin(useGSAP);
 
-function galleryRows(images: string[]) {
-  const rows: { src: string; variant: "wide" | "tall" | "default" }[][] = [];
+const MIN_GALLERY_IMAGES = 8;
+const MIN_REEL_VIDEOS = 3;
+
+type GallerySlot =
+  | { kind: "image"; src: string }
+  | { kind: "placeholder"; id: string };
+
+function padGallery(images: string[], min = MIN_GALLERY_IMAGES): GallerySlot[] {
+  const slots: GallerySlot[] = images.map((src) => ({ kind: "image", src }));
+  let n = 0;
+  while (slots.length < min) {
+    n += 1;
+    slots.push({ kind: "placeholder", id: `img-ph-${n}` });
+  }
+  return slots;
+}
+
+function padReels(videos: Project["videos"], min = MIN_REEL_VIDEOS): ReelItem[] {
+  const items: ReelItem[] = (videos ?? []).map((v) => ({
+    ...v,
+    kind: "video" as const,
+  }));
+  let n = 0;
+  while (items.length < min) {
+    n += 1;
+    items.push({
+      kind: "placeholder",
+      id: `vid-ph-${n}`,
+      caption: "Vídeo",
+    });
+  }
+  return items;
+}
+
+function galleryRows(slots: GallerySlot[]) {
+  const rows: { slot: GallerySlot; variant: "wide" | "tall" | "default" }[][] = [];
   let i = 0;
-  if (images[0]) {
-    rows.push([{ src: images[0], variant: "wide" }]);
+  if (slots[0]) {
+    rows.push([{ slot: slots[0], variant: "wide" }]);
     i = 1;
   }
-  while (i < images.length) {
-    const a = images[i]!;
-    const b = images[i + 1];
+  while (i < slots.length) {
+    const a = slots[i]!;
+    const b = slots[i + 1];
     if (b) {
       rows.push([
-        { src: a, variant: "tall" },
-        { src: b, variant: "tall" },
+        { slot: a, variant: "tall" },
+        { slot: b, variant: "tall" },
       ]);
       i += 2;
     } else {
-      rows.push([{ src: a, variant: "default" }]);
+      rows.push([{ slot: a, variant: "default" }]);
       i += 1;
     }
   }
   return rows;
+}
+
+function GalleryMedia({
+  slot,
+  variant,
+}: {
+  slot: GallerySlot;
+  variant: "wide" | "tall" | "default";
+}) {
+  if (slot.kind === "placeholder") {
+    return (
+      <div
+        className={`img-placeholder ${variant} is-empty-placeholder`}
+        aria-label="Imagen pendiente"
+      >
+        <span>Imagen</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      className={`img-placeholder ${variant}`}
+      src={assetUrl(slot.src)}
+      alt=""
+      loading="lazy"
+      decoding="async"
+    />
+  );
+}
+
+function GalleryBlock({ slots }: { slots: GallerySlot[] }) {
+  if (slots.length === 0) return null;
+  return (
+    <section className="project-gallery">
+      <div className="gallery">
+        {galleryRows(slots).map((row, ri) =>
+          row.length === 2 ? (
+            <div className="gallery-row" key={`row-${ri}`}>
+              {row.map((item) => (
+                <GalleryMedia
+                  key={item.slot.kind === "image" ? item.slot.src : item.slot.id}
+                  slot={item.slot}
+                  variant={item.variant}
+                />
+              ))}
+            </div>
+          ) : (
+            <GalleryMedia
+              key={row[0]!.slot.kind === "image" ? row[0]!.slot.src : row[0]!.slot.id}
+              slot={row[0]!.slot}
+              variant={row[0]!.variant}
+            />
+          )
+        )}
+      </div>
+    </section>
+  );
 }
 
 export default function ProjectDetail({ project }: { project: Project }) {
@@ -40,10 +134,13 @@ export default function ProjectDetail({ project }: { project: Project }) {
   const previewRef = useRef<HTMLImageElement>(null);
   const nextProject = getNextProject(project.id);
 
-  // Al pulsar "Siguiente proyecto": clonamos la imagen y la hacemos crecer
-  // hasta ocupar toda la pantalla (mismo espíritu que el morph de la espiral),
-  // y solo entonces navegamos. El clon queda por encima durante la navegación
-  // (evita flash) y se retira cuando el detalle ya ha pintado.
+  const sections = project.sections ?? [];
+  const gallerySlots = padGallery(project.images);
+  const splitAt = Math.max(Math.ceil(gallerySlots.length / 2), 3);
+  const firstGallery = gallerySlots.slice(0, splitAt);
+  const restGallery = gallerySlots.slice(splitAt);
+  const reelItems = padReels(project.videos);
+
   const goToNextProject = () => {
     const img = previewRef.current;
     const url = `/proyecto/${nextProject.id}`;
@@ -54,6 +151,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
 
     const rect = img.getBoundingClientRect();
     const clone = document.createElement("img");
+    clone.setAttribute("data-next-project-clone", "true");
     clone.src = coverUrl(nextProject.id);
     clone.decoding = "sync";
     clone.crossOrigin = "anonymous";
@@ -65,7 +163,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
       height: `${rect.height}px`,
       objectFit: "cover",
       objectPosition: "center",
-      borderRadius: "16px",
+      borderRadius: "0px",
       margin: "0",
       zIndex: "9999",
       pointerEvents: "none",
@@ -81,27 +179,15 @@ export default function ProjectDetail({ project }: { project: Project }) {
       duration: 0.7,
       ease: "power3.inOut",
       onComplete: () => {
-        // Avanzamos el estado de transición al proyecto siguiente (uno más en
-        // la secuencia de la espiral, mismo encuadre), para que al pulsar
-        // "Volver" el morph de cierre salga DE ESTE proyecto y no del original.
         if (transition.active) {
           transition.virtIdx += 1;
           transition.scroll += 1;
           transition.projectId = nextProject.id;
         }
         router.push(url);
-        // No retiramos el clon por número fijo de frames: la navegación de App
-        // Router no es síncrona y a veces el hero destino aún no ha pintado =>
-        // se colaba un frame de la página saliente. Esperamos a que el hero del
-        // proyecto destino EXISTA y esté decodificado, y solo entonces lo
-        // quitamos (con un tope de seguridad por si algo falla).
         const nextSrc = coverUrl(nextProject.id);
         let tries = 0;
         const removeWhenReady = () => {
-          // Buscamos el HERO del proyecto DESTINO (por su URL). Importante usar
-          // [data-hero]: la página saliente ya contiene la preview del proyecto
-          // siguiente (mismo src) => sin este filtro dábamos por "listo" el
-          // destino estando aún en la página anterior y se colaba su frame.
           const heroReady = Array.from(
             document.querySelectorAll<HTMLImageElement>('div[data-page="project"] img[data-hero]')
           ).some((el) => el.src === nextSrc && el.complete);
@@ -124,21 +210,39 @@ export default function ProjectDetail({ project }: { project: Project }) {
 
   useGSAP(
     () => {
-      // La imagen ya llega a pantalla completa desde el morph 3D y debe quedar
-      // QUIETA en el mismo encuadre (si la animáramos habría un salto al navegar).
-
-      // Estado inicial oculto aplicado de forma SÍNCRONA (antes del primer
-      // pintado) para que no haya un frame con todo visible (parpadeo/FOUC).
       gsap.set(".reveal", { opacity: 0, y: 20 });
+      gsap.set(".hero-gradient-fade", { opacity: 0 });
 
-      gsap.to(".reveal", {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        ease: "power3.out",
-        stagger: 0.1,
-        delay: 0.15,
-      });
+      let cancelled = false;
+      const waitAndPlayEnter = () => {
+        if (cancelled) return;
+        const activeClone = document.querySelector('[data-next-project-clone="true"]');
+        if (activeClone) {
+          requestAnimationFrame(waitAndPlayEnter);
+          return;
+        }
+
+        gsap.to(".reveal", {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: "power3.out",
+          stagger: 0.1,
+          delay: 0.15,
+        });
+
+        gsap.to(".hero-gradient-fade", {
+          opacity: 1,
+          duration: 0.7,
+          ease: "power2.out",
+          delay: 0.1,
+        });
+      };
+      waitAndPlayEnter();
+
+      return () => {
+        cancelled = true;
+      };
     },
     { scope: container, dependencies: [project.id] }
   );
@@ -152,7 +256,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
         position: "relative",
         width: "100%",
         minHeight: "100vh",
-        background: "#1a1a1a",
+        background: "var(--bg-soft)",
         overflowX: "hidden",
       }}
     >
@@ -182,6 +286,17 @@ export default function ProjectDetail({ project }: { project: Project }) {
         />
 
         <div
+          className="hero-gradient-fade"
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 42%, transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
           style={{
             position: "absolute",
             left: 0,
@@ -191,15 +306,21 @@ export default function ProjectDetail({ project }: { project: Project }) {
           }}
         >
           <div className="content-width">
+            <p
+              className="reveal ui-label"
+              style={{ color: "var(--accent)", marginBottom: "0.75rem" }}
+            >
+              {project.category} · {project.year}
+            </p>
             <h1
-              className="reveal"
+              className="reveal project-hero-title"
               style={{
                 fontSize: "clamp(3.5rem, 10vw, 8rem)",
                 fontWeight: 800,
                 lineHeight: 1.02,
-                letterSpacing: "-0.055em",
                 color: "#fff",
                 textAlign: "left",
+                maxWidth: "14ch",
               }}
             >
               {project.title}
@@ -208,19 +329,36 @@ export default function ProjectDetail({ project }: { project: Project }) {
         </div>
       </section>
 
+      {/* ── Meta ─────────────────────────────────────────────────────── */}
+      {(project.client || (project.deliverables && project.deliverables.length > 0)) && (
+        <section className="project-meta">
+          <div className="content-width project-meta-grid">
+            {project.client && (
+              <div className="project-meta-item">
+                <p className="ui-label project-meta-label">Cliente</p>
+                <p className="project-meta-value">{project.client}</p>
+              </div>
+            )}
+            <div className="project-meta-item">
+              <p className="ui-label project-meta-label">Año</p>
+              <p className="project-meta-value">{project.year}</p>
+            </div>
+            <div className="project-meta-item">
+              <p className="ui-label project-meta-label">Categoría</p>
+              <p className="project-meta-value">{project.category}</p>
+            </div>
+            {project.deliverables && project.deliverables.length > 0 && (
+              <div className="project-meta-item project-meta-deliverables">
+                <p className="ui-label project-meta-label">Alcance</p>
+                <p className="project-meta-value">{project.deliverables.join(" · ")}</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* ── Manifiesto ───────────────────────────────────────────────── */}
-      <section
-        className="manifesto"
-        style={{
-          position: "relative",
-          background: "#1a1a1a",
-          color: "#fff",
-          padding: "clamp(4.5rem, 12vw, 9rem) clamp(1.5rem, 5vw, 4.5rem)",
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
+      <section className="manifesto service-manifesto">
         <div className="manifesto-grid">
           <p
             className="manifesto-label ui-label"
@@ -231,69 +369,55 @@ export default function ProjectDetail({ project }: { project: Project }) {
           >
             {project.label}
           </p>
-          <p
-            className="manifesto-body"
-            style={{
-              fontSize: "clamp(1.55rem, 3.6vw, 3.15rem)",
-              fontWeight: 400,
-              lineHeight: 1.18,
-              letterSpacing: "-0.05em",
-              color: "#fff",
-              userSelect: "text",
-            }}
-          >
-            {project.statement}
-          </p>
+          <div>
+            <p className="manifesto-body service-manifesto-body" style={{ userSelect: "text", whiteSpace: "pre-line" }}>
+              {project.statement}
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* ── Galería ─────────────────────────────────────────────────── */}
-      {project.images.length > 0 && (
-        <section
-          style={{
-            background: "#1a1a1a",
-            padding: "0 clamp(1.5rem, 5vw, 4.5rem) clamp(4.5rem, 12vw, 9rem)",
-          }}
-        >
-          <div className="gallery">
-            {galleryRows(project.images).map((row, ri) =>
-              row.length === 2 ? (
-                <div className="gallery-row" key={`row-${ri}`}>
-                  {row.map((item) => (
-                    <img
-                      key={item.src}
-                      className={`img-placeholder ${item.variant}`}
-                      src={item.src}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ))}
-                </div>
-              ) : (
-                <img
-                  key={row[0]!.src}
-                  className={`img-placeholder ${row[0]!.variant}`}
-                  src={row[0]!.src}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              )
-            )}
+      {/* ── Galería (primera mitad) ──────────────────────────────────── */}
+      <GalleryBlock slots={firstGallery} />
+
+      {/* ── Sección de texto 1 ───────────────────────────────────────── */}
+      {sections[0] && (
+        <section className="project-section">
+          <div className="content-width project-section-grid">
+            <p className="ui-label project-section-label">{sections[0].title}</p>
+            <p className="project-section-body">{sections[0].body}</p>
           </div>
         </section>
       )}
 
+      {/* ── Carrusel vertical ────────────────────────────────────────── */}
+      <VerticalVideoCarousel items={reelItems} label="Vídeos" />
+
+      {/* ── Sección de texto 2+ ──────────────────────────────────────── */}
+      {sections.slice(1).map((section) => (
+        <section key={section.title} className="project-section">
+          <div className="content-width project-section-grid">
+            <p className="ui-label project-section-label">{section.title}</p>
+            <p className="project-section-body">{section.body}</p>
+          </div>
+        </section>
+      ))}
+
+      {/* ── Galería (resto) ──────────────────────────────────────────── */}
+      <GalleryBlock slots={restGallery} />
+
       {/* ── Siguiente proyecto ───────────────────────────────────────── */}
       <section
         style={{
-          background: "#1a1a1a",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+          background: "var(--bg-soft)",
+          borderTop: "1px solid rgba(200,255,0,0.2)",
           padding: "clamp(4.5rem, 12vw, 9rem) clamp(1.5rem, 5vw, 4.5rem)",
         }}
       >
         <div className="next-project">
+          <p className="ui-label" style={{ color: "var(--accent)" }}>
+            Siguiente
+          </p>
           <img
             ref={previewRef}
             className="next-project-preview"
@@ -307,7 +431,6 @@ export default function ProjectDetail({ project }: { project: Project }) {
               fontSize: "clamp(2.25rem, 6vw, 4.5rem)",
               fontWeight: 800,
               lineHeight: 1.05,
-              letterSpacing: "-0.055em",
               color: "#fff",
             }}
           >
@@ -315,10 +438,12 @@ export default function ProjectDetail({ project }: { project: Project }) {
           </h2>
           <button type="button" className="next-project-btn" onClick={goToNextProject}>
             Siguiente proyecto
-            <ArrowRight size={16} strokeWidth={2} />
+            <ArrowRight size={16} strokeWidth={2.5} />
           </button>
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }
