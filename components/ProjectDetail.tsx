@@ -12,38 +12,19 @@ import VerticalVideoCarousel, { type ReelItem } from "@/components/VerticalVideo
 
 gsap.registerPlugin(useGSAP);
 
-const MIN_GALLERY_IMAGES = 8;
-const MIN_REEL_VIDEOS = 3;
-
 type GallerySlot =
   | { kind: "image"; src: string }
   | { kind: "placeholder"; id: string };
 
-function padGallery(images: string[], min = MIN_GALLERY_IMAGES): GallerySlot[] {
-  const slots: GallerySlot[] = images.map((src) => ({ kind: "image", src }));
-  let n = 0;
-  while (slots.length < min) {
-    n += 1;
-    slots.push({ kind: "placeholder", id: `img-ph-${n}` });
-  }
-  return slots;
+function gallerySlotsOf(images: string[]): GallerySlot[] {
+  return images.map((src) => ({ kind: "image", src }));
 }
 
-function padReels(videos: Project["videos"], min = MIN_REEL_VIDEOS): ReelItem[] {
-  const items: ReelItem[] = (videos ?? []).map((v) => ({
+function reelItemsOf(videos: Project["videos"]): ReelItem[] {
+  return (videos ?? []).map((v) => ({
     ...v,
     kind: "video" as const,
   }));
-  let n = 0;
-  while (items.length < min) {
-    n += 1;
-    items.push({
-      kind: "placeholder",
-      id: `vid-ph-${n}`,
-      caption: "Vídeo",
-    });
-  }
-  return items;
 }
 
 function galleryRows(slots: GallerySlot[]) {
@@ -133,13 +114,14 @@ export default function ProjectDetail({ project }: { project: Project }) {
   const container = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLImageElement>(null);
   const nextProject = getNextProject(project.id);
+  const containHero = project.heroFit === "contain";
 
   const sections = project.sections ?? [];
-  const gallerySlots = padGallery(project.images);
-  const splitAt = Math.max(Math.ceil(gallerySlots.length / 2), 3);
+  const gallerySlots = gallerySlotsOf(project.images);
+  const splitAt = Math.max(Math.ceil(gallerySlots.length / 2), 1);
   const firstGallery = gallerySlots.slice(0, splitAt);
   const restGallery = gallerySlots.slice(splitAt);
-  const reelItems = padReels(project.videos);
+  const reelItems = reelItemsOf(project.videos);
 
   const goToNextProject = () => {
     const img = previewRef.current;
@@ -262,11 +244,13 @@ export default function ProjectDetail({ project }: { project: Project }) {
     >
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section
+        className={containHero ? "project-hero is-contain" : "project-hero"}
         style={{
           position: "relative",
           width: "100%",
           height: "100vh",
           overflow: "hidden",
+          background: containHero ? "#101010" : undefined,
         }}
       >
         <img
@@ -280,7 +264,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
             inset: 0,
             width: "100%",
             height: "100%",
-            objectFit: "cover",
+            objectFit: containHero ? "contain" : "cover",
             objectPosition: "center",
           }}
         />
@@ -290,8 +274,9 @@ export default function ProjectDetail({ project }: { project: Project }) {
           style={{
             position: "absolute",
             inset: 0,
-            background:
-              "linear-gradient(to top, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 42%, transparent 70%)",
+            background: containHero
+              ? "linear-gradient(to top, rgba(5,5,5,0.55) 0%, transparent 34%)"
+              : "linear-gradient(to top, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 42%, transparent 70%)",
             pointerEvents: "none",
           }}
         />

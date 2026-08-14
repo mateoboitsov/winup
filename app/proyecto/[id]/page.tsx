@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProject, PROJECTS_DATA } from "@/lib/projects";
+import { attachProjectMedia } from "@/lib/projectMedia";
 import ProjectDetail from "@/components/ProjectDetail";
 
 export function generateStaticParams() {
@@ -15,5 +16,5 @@ export default async function ProjectPage({
   const project = getProject(Number(id));
   if (!project) notFound();
 
-  return <ProjectDetail project={project} />;
+  return <ProjectDetail project={attachProjectMedia(project)} />;
 }

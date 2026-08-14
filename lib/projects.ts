@@ -24,12 +24,14 @@ export type Project = {
   statement: string;
   /** Bloques de texto adicionales intercalados en la ficha. */
   sections?: ProjectSection[];
-  /** Vídeos verticales (9:16) para el carrusel. */
+  /** Vídeos (9:16) para el carrusel. */
   videos?: ProjectVideo[];
   /** Entregables / alcance del proyecto. */
   deliverables?: string[];
   /** Cliente o marca. */
   client?: string;
+  /** contain: portadas gráficas (no recortar logos ni tipografía). */
+  heroFit?: "cover" | "contain";
 };
 
 /** Codifica segmentos de ruta (espacios, tildes, ¡¿, etc.). */
@@ -42,38 +44,24 @@ export function assetUrl(path: string) {
     .join("/");
 }
 
+function project(draft: Omit<Project, "cover" | "images" | "videos">): Project {
+  return {
+    ...draft,
+    cover: `/media/${draft.id}/cover.jpg`,
+    images: [],
+  };
+}
+
 const NEGRO_MATE_STATEMENT =
   "Negro Mate es una cafetería de especialidad que apuesta por una estética minimalista y atemporal. Su identidad se construye a partir de una paleta monocromática en blanco y negro, que refleja elegancia, sobriedad y atención al detalle —valores que también se encuentran en cada taza de café que sirven.\n\nEl diseño visual se apoya en ilustraciones originales que representan los distintos productos que se ofrecen en la tienda. Estas ilustraciones aportan un toque distintivo y cálido, rompiendo con la rigidez del blanco y negro, y creando un universo visual propio que conecta con el público amante del café y del diseño cuidado.\n\nEl sistema gráfico se aplica de forma coherente en packaging, señalética, menús y redes sociales, reforzando una marca con personalidad, limpia pero cercana.";
 
-const XWHITE_SESSION = [
-  70, 75, 80, 85, 90, 95, 100, 105, 110,
-].map((n) => `/proyectos/SESIÓN DE FOTOS/xwhite /${n}.png`);
-
 export const PROJECTS_DATA: Project[] = [
-  {
+  project({
     id: 1,
     title: "Negro Mate",
     category: "Branding",
     year: "2025",
     client: "Negro Mate",
-    cover: "/media/1/cover.jpg",
-    images: [
-      "/media/1/01.jpg",
-      "/media/1/02.jpg",
-      "/media/1/03.jpg",
-      "/media/1/04.jpg",
-      "/media/1/05.jpg",
-      "/media/1/06.jpg",
-      "/media/1/07.jpg",
-      "/proyectos/BRANDING/Cafetería Negro Mate/Fachada.jpg",
-      "/proyectos/BRANDING/Cafetería Negro Mate/Menú.jpg",
-      "/proyectos/BRANDING/Cafetería Negro Mate/Uniformes.jpg",
-      "/proyectos/BRANDING/Cafetería Negro Mate/Valla.jpg",
-      "/proyectos/BRANDING/Cafetería Negro Mate/Ticket.jpg",
-      "/proyectos/BRANDING/Cafetería Negro Mate/Aplicaciones RRSS.jpg",
-      "/proyectos/BRANDING/Cafetería Negro Mate/Vaso de Café.png",
-      "/proyectos/BRANDING/Cafetería Negro Mate/Recursos de Marca.png",
-    ],
     label: "Branding",
     statement: NEGRO_MATE_STATEMENT,
     deliverables: [
@@ -92,27 +80,13 @@ export const PROJECTS_DATA: Project[] = [
         body: "Del uniforme a la valla: el branding no se queda en el PDF. Se vive en el espacio y en el día a día del café.",
       },
     ],
-  },
-  {
+  }),
+  project({
     id: 2,
     title: "Palacio de los Deportes 30",
     category: "Motion",
     year: "2025",
     client: "Palacio de los Deportes",
-    cover: "/media/2/cover.jpg",
-    images: [
-      "/media/2/01.jpg",
-      "/media/2/02.jpg",
-      "/media/2/03.jpg",
-      "/media/2/04.jpg",
-      "/media/2/05.jpg",
-      "/proyectos/PROYECTO 30 PALACIO DE LOS DEPORTES/IMG_5173.PNG",
-      "/proyectos/PROYECTO 30 PALACIO DE LOS DEPORTES/IMG_5174.PNG",
-      "/proyectos/PROYECTO 30 PALACIO DE LOS DEPORTES/IMG_5175.PNG",
-      "/proyectos/PROYECTO 30 PALACIO DE LOS DEPORTES/IMG_5177.PNG",
-      "/proyectos/PROYECTO 30 PALACIO DE LOS DEPORTES/IMG_5179.PNG",
-      "/proyectos/PROYECTO 30 PALACIO DE LOS DEPORTES/IMG_5180.PNG",
-    ],
     label: "Evento",
     statement:
       "El Palacio de los Deportes cumple 30 años y la campaña tenía que sentirse como una celebración, no como un aniversario corporativo. Trabajamos motion, stills y piezas para redes con un tono directo, energético y muy murciano.\n\nEl objetivo era movilizar público y recordar por qué este espacio sigue siendo referente de cultura, deporte y directo. Cada frame empuja al siguiente: ritmo de evento, tipografía grande y un mensaje claro.\n\nEl resultado es un ecosistema visual listo para stories, feed y pantallas: la misma idea, distintos formatos, misma intensidad.",
@@ -127,24 +101,13 @@ export const PROJECTS_DATA: Project[] = [
         body: "Además de los stills, preparamos vídeo en formato vertical para Instagram y TikTok: el mismo claim, adaptado al ritmo del feed.",
       },
     ],
-    videos: [
-      {
-        src: "/proyectos/PROYECTO 30 PALACIO DE LOS DEPORTES/¡El Palacio cumple 30 años y viene MUY fuerte!¿Te creías que esto iba a ser un cumple cualquiera.mp4",
-        poster: "/media/2/cover.jpg",
-        caption: "Reel aniversario",
-      },
-    ],
-  },
-  {
+  }),
+  project({
     id: 3,
     title: "Arde Bogotá",
     category: "Motion",
     year: "2025",
     client: "Arde Bogotá",
-    cover: "/media/3/cover.jpg",
-    images: [
-      "/proyectos/PROYECTO ARDE BOGOTA/IMG_4765.JPG",
-    ],
     label: "Motion",
     statement:
       "Arde Bogotá pide energía en directo. Esta pieza audiovisual traduce el directo a lenguaje de redes: cortes rápidos, presencia de banda y una narrativa pensada para Instagram.\n\nNo buscamos un teaser genérico. Buscamos que quien lo vea sienta la sala: volumen, público y esa tensión previa al primer tema.\n\nEl formato vertical es el canal natural: se consume en el móvil, se comparte y mantiene la intensidad del concierto en 15–30 segundos.",
@@ -155,35 +118,16 @@ export const PROJECTS_DATA: Project[] = [
         body: "Editamos al tempo de la banda: entradas fuertes, respiraciones cortas y un cierre que deja ganas de más.",
       },
     ],
-    videos: [
-      {
-        src: "/proyectos/PROYECTO ARDE BOGOTA/SonBuenos - Arde Bogotá (instagram).mp4",
-        poster: "/media/3/cover.jpg",
-        caption: "Reel Instagram",
-      },
-    ],
-  },
-  {
+  }),
+  project({
     id: 4,
-    title: "La Cañada",
+    title: "Cañada Honda",
     category: "Fotografía",
     year: "2025",
-    client: "La Cañada",
-    cover: "/media/4/cover.jpg",
-    images: [
-      "/media/4/01.jpg",
-      "/media/4/02.jpg",
-      "/media/4/03.jpg",
-      "/media/4/04.jpg",
-      "/proyectos/PROYECTO LA CAÑADA/_MG_0078.jpg",
-      "/proyectos/PROYECTO LA CAÑADA/b1fe5e62-1aff-4fdc-9f59-9d7b09ef2d3a.JPG",
-      "/proyectos/PROYECTO LA CAÑADA/b841ecb0-5dd0-4049-8e57-7993e37903dd.JPG",
-      "/proyectos/PROYECTO LA CAÑADA/WhatsApp Image 2025-04-27 at 18.02.09-5.jpeg",
-      "/proyectos/PROYECTO LA CAÑADA/WhatsApp Image 2025-04-27 at 18.02.10-3.jpeg",
-    ],
+    client: "Cañada Honda",
     label: "Fotografía",
     statement:
-      "Sesión fotográfica para La Cañada: atmósfera, detalle y presencia de marca en entorno real. Priorizamos luz natural, texturas y una lectura limpia del producto y del espacio.\n\nCada fotograma busca transmitir calma y carácter sin forzar el estilo. El resultado sirve tanto para web como para redes: material versátil, coherente y listo para editar.\n\nTrabajamos plano general y detalle para que la marca tenga rango: desde la primera impresión hasta el close-up que se queda en la memoria.",
+      "Sesión para Cañada Honda: atmósfera, detalle y presencia de marca en entorno real. Priorizamos luz, texturas y una lectura limpia del espacio y de la experiencia.\n\nCada fotograma busca transmitir carácter sin forzar el estilo. El resultado sirve tanto para web como para redes: material versátil, coherente y listo para comunicar.\n\nTrabajamos plano general y detalle para que la marca tenga rango: desde la primera impresión hasta el close-up que se queda.",
     deliverables: ["Sesión fotográfica", "Selección final", "Retoque"],
     sections: [
       {
@@ -191,19 +135,13 @@ export const PROJECTS_DATA: Project[] = [
         body: "Disparamos en el propio entorno para que la marca respire verdad: menos set, más lugar.",
       },
     ],
-  },
-  {
+  }),
+  project({
     id: 5,
     title: "La Disquera",
     category: "Fotografía",
     year: "2025",
     client: "La Disquera",
-    cover: "/media/5/cover.jpg",
-    images: [
-      "/media/5/01.jpg",
-      "/proyectos/PROYECTO LA DISQUERA/La Disquera-6.jpg",
-      "/proyectos/PROYECTO LA DISQUERA/La Disquera-9.jpg",
-    ],
     label: "Fotografía",
     statement:
       "Retrato de La Disquera: vinilos, espacio y cultura musical en una lectura visual limpia. Queríamos que se notara el oficio y el ambiente sin sobrecargar la imagen.\n\nLa sesión combina detalle de producto y planos que explican el local. Ideal para comunicación de marca y para quien descubre el espacio por primera vez en redes.\n\nMenos pose, más presencia: la fotografía deja hablar al sitio.",
@@ -214,17 +152,13 @@ export const PROJECTS_DATA: Project[] = [
         body: "Composiciones sobrias que ponen el foco en lo esencial: el disco, la luz y el carácter del local.",
       },
     ],
-  },
-  {
+  }),
+  project({
     id: 6,
     title: "Turismo Región de Murcia",
     category: "Motion",
     year: "2025",
     client: "Turismo Región de Murcia",
-    cover: "/media/6/cover.jpg",
-    images: [
-      "/proyectos/PROYECTO TURISMO DE LA REGION DE MURCIA/murcia-la-manga-2.jpeg",
-    ],
     label: "Turismo",
     statement:
       "Comunicación audiovisual para Turismo de la Región de Murcia: destino, luz y territorio. El brief pedía una pieza con vocación MICE y una lectura clara del atractivo regional.\n\nConstruimos un relato visual que equilibra paisaje, actividad y hospitalidad. El motion sirve para ferias, pantallas y redes: mismo mensaje, distinto contexto de visionado.\n\nLa Región se cuenta sin catálogo: se siente.",
@@ -235,68 +169,34 @@ export const PROJECTS_DATA: Project[] = [
         body: "Secuencias pensadas para transmitir amplitud y ritmo: del territorio a la experiencia, sin perder elegancia institucional.",
       },
     ],
-    videos: [
-      {
-        src: "/proyectos/PROYECTO TURISMO DE LA REGION DE MURCIA/V3 - MICE - Regio_n de Murcia.mp4",
-        poster: "/media/6/cover.jpg",
-        caption: "Pieza MICE",
-      },
-    ],
-  },
-  {
+  }),
+  project({
     id: 7,
     title: "XWHITE",
     category: "Branding",
     year: "2025",
     client: "XWHITE",
-    cover: "/media/7/cover.jpg",
-    images: [
-      "/media/7/01.jpg",
-      "/proyectos/PROYECTO XWHITE/73 (1).png",
-      "/proyectos/PROYECTO XWHITE/89 (1).png",
-      ...XWHITE_SESSION,
-    ],
     label: "Branding",
     statement:
-      "Identidad y piezas visuales para XWHITE: contraste, producto y lenguaje gráfico contemporáneo. Partimos de una dirección limpia para que el producto hable con fuerza.\n\nLa sesión y las aplicaciones refuerzan un universo blanco, preciso y premium. Cada imagen suma a una misma lectura de marca: clara, moderna y reconocible.\n\nDel still al sistema: coherencia en feed, lookbook y comunicación comercial.",
-    deliverables: ["Dirección de arte", "Sesión de producto", "Piezas de marca"],
+      "Identidad y piezas visuales para XWHITE: contraste, producto y lenguaje gráfico contemporáneo. Partimos de una dirección limpia para que el producto hable con fuerza.\n\nLa sesión de estudio y el motion refuerzan un universo preciso y premium. Cada imagen suma a una misma lectura de marca: clara, moderna y reconocible.\n\nDel still al sistema: coherencia en feed, lookbook y comunicación comercial.",
+    deliverables: ["Dirección de arte", "Sesión de producto", "Motion de marca"],
     sections: [
       {
         title: "Contraste y producto",
         body: "Composiciones con mucho aire y foco en textura. El blanco no es vacío: es el territorio de la marca.",
       },
       {
-        title: "Serie fotográfica",
-        body: "Una secuencia pensada para scroll: variaciones de pose, detalle y atmósfera que mantienen el mismo criterio visual.",
+        title: "Una identidad, varios caminos",
+        body: "La pieza de motion cierra el relato: tres caminos, una identidad. Misma precisión, distinto encuadre.",
       },
     ],
-  },
-  {
+  }),
+  project({
     id: 8,
     title: "Sabe a Murcia",
     category: "Fotografía",
     year: "2025",
     client: "Sabe a Murcia",
-    cover: "/media/8/cover.jpg",
-    images: [
-      "/media/8/01.jpg",
-      "/media/8/02.jpg",
-      "/media/8/03.jpg",
-      "/media/8/04.jpg",
-      "/media/8/05.jpg",
-      "/media/8/06.jpg",
-      "/media/8/07.jpg",
-      "/media/8/08.jpg",
-      "/media/8/09.jpg",
-      "/media/8/10.jpg",
-      "/media/8/11.jpg",
-      "/proyectos/SABEAMURCIA/DSC06622.JPG",
-      "/proyectos/SABEAMURCIA/DSC06646.JPG",
-      "/proyectos/SABEAMURCIA/DSC06685.JPG",
-      "/proyectos/SABEAMURCIA/DSC06709.JPG",
-      "/proyectos/SABEAMURCIA/DSC06742.JPG",
-      "/proyectos/SABEAMURCIA/DSC06781.JPG",
-    ],
     label: "Fotografía",
     statement:
       "Cobertura fotográfica de Sabe a Murcia: producto, gente y territorio con mirada documental. Capturamos el evento sin perder el sabor del lugar.\n\nHay planos de producto, de público y de ambiente. El conjunto cuenta una historia de región: lo que se cocina, quién lo comparte y cómo se vive.\n\nMaterial listo para prensa, redes y memoria del evento.",
@@ -307,7 +207,246 @@ export const PROJECTS_DATA: Project[] = [
         body: "Entre el reportaje y la marca: imágenes útiles, honestas y con dirección clara para que el festival se recuerde bien.",
       },
     ],
-  },
+  }),
+  project({
+    id: 9,
+    title: "La Laguna Sound",
+    category: "Motion",
+    year: "2025",
+    client: "La Laguna Sound",
+    label: "Evento",
+    statement:
+      "La Laguna Sound pide directo, público y un aftertaste que se pueda compartir al día siguiente. Documentamos el concierto con stills y piezas verticales pensadas para Instagram.\n\nEl relato es el de una noche que se vive en sala y se alarga en el móvil: energía, escenario y esa sensación de haber estado ahí.\n\nEditamos para el scroll sin perder el pulso del concierto.",
+    deliverables: ["Cobertura de concierto", "Reels", "Stills RRSS"],
+    sections: [
+      {
+        title: "La noche en vertical",
+        body: "Dos piezas de recap y una secuencia de stills para que el evento siga trabajando cuando ya se han apagado las luces.",
+      },
+    ],
+  }),
+  project({
+    id: 10,
+    title: "Bigup",
+    category: "Motion",
+    year: "2025",
+    client: "Bigup",
+    label: "Redes",
+    statement:
+      "Piezas para Bigup: ritmo de feed, tipografía grande y una lectura inmediata. El trabajo está pensado para parar el scroll y dejar marca, no para explicar de más.\n\nCada still funciona solo y en secuencia. Misma dirección, distintos encuadres, pensados para stories y grid.\n\nMenos ruido, más presencia.",
+    deliverables: ["Stills para redes", "Dirección visual", "Piezas de campaña"],
+    sections: [
+      {
+        title: "Hecho para el feed",
+        body: "Composiciones de alto contraste, listas para publicar: el formato manda y el mensaje llega en un golpe de vista.",
+      },
+    ],
+  }),
+  project({
+    id: 11,
+    title: "Hotel Nelva",
+    category: "Fotografía",
+    year: "2025",
+    client: "Hotel Nelva",
+    label: "Fotografía",
+    statement:
+      "Hotel Nelva en Murcia: hospitalidad, espacio y detalle. Fotografiamos el hotel como se vive, no como un catálogo frío.\n\nStills y fotografía conviven para web, reservas y redes. Luz de interior, materiales y una lectura premium del servicio.\n\nEl objetivo era claro: que quien lo vea quiera quedarse.",
+    deliverables: ["Fotografía de hotel", "Stills", "Material web y RRSS"],
+    sections: [
+      {
+        title: "Hospitalidad en imagen",
+        body: "Planos de espacio y de ambiente para que el hotel se entienda en un vistazo: dónde estás y cómo se siente.",
+      },
+    ],
+  }),
+  project({
+    id: 12,
+    title: "Odiseo",
+    category: "Motion",
+    year: "2025",
+    client: "Odiseo",
+    label: "Motion",
+    statement:
+      "Odiseo pide espectáculo. Extraemos stills de alta densidad visual para que el ocio se lea premium: luz, arquitectura y noche.\n\nLas piezas sirven para campaña y para redes. Una dirección de arte contenida, con el volumen justo para que el recinto hable.\n\nMurcia de noche, con criterio.",
+    deliverables: ["Stills de campaña", "Dirección de arte", "Piezas RRSS"],
+    sections: [
+      {
+        title: "Noche con dirección",
+        body: "Elegimos frames que venden el lugar sin recargarlo: contraste, escala y una paleta que se reconoce.",
+      },
+    ],
+  }),
+  project({
+    id: 13,
+    title: "Licor 43",
+    category: "Fotografía",
+    year: "2025",
+    client: "Licor 43",
+    label: "Fotografía",
+    statement:
+      "Licor 43 en Cartagena: producto, territorio y una marca que ya es icono. La sesión busca el cruce entre el oro de la botella y la luz del puerto.\n\nFotografía de producto y de contexto para que la marca se sienta cercana y premium a la vez.\n\nMaterial para campaña, punto de venta y redes.",
+    deliverables: ["Fotografía de producto", "Entorno y campaña", "Selección final"],
+    sections: [
+      {
+        title: "Producto y lugar",
+        body: "La botella no flota en un fondo vacío: se ancla a Cartagena. El territorio suma, no distrae.",
+      },
+    ],
+  }),
+  project({
+    id: 14,
+    title: "FASRM",
+    category: "Fotografía",
+    year: "2025",
+    client: "FASRM",
+    label: "Fotografía",
+    statement:
+      "Cobertura para FASRM: reportaje y una pieza en movimiento. Documentamos el evento con plano corto y plano de ambiente, listo para comunicar con rapidez.\n\nLa fotografía sostiene el relato; el vídeo lo cierra. Mismo criterio, dos velocidades.\n\nMaterial útil el mismo día y con recorrido después.",
+    deliverables: ["Reportaje", "Vídeo recap", "Piezas RRSS"],
+    sections: [
+      {
+        title: "Documentar y publicar",
+        body: "Selección limpia, sin adorno de más: gente, gesto y contexto. Lo justo para que el evento se entienda.",
+      },
+    ],
+  }),
+  project({
+    id: 15,
+    title: "Forbes · Mainkore",
+    category: "Motion",
+    year: "2025",
+    client: "Mainkore",
+    label: "Aftermovie",
+    heroFit: "contain",
+    statement:
+      "Aftermovie para Mainkore en clave Forbes: evento, networking y una marca que se ve en movimiento.\n\nMontaje de ritmo alto, pensado para recap y para que el cliente lo enseñe como prueba de lo que ocurrió en sala.\n\nUna pieza, varios cortes, misma tensión.",
+    deliverables: ["Aftermovie", "Edición de evento", "Pieza de marca"],
+    sections: [
+      {
+        title: "El evento, compacto",
+        body: "Seleccionamos los momentos que construyen estatus: llegada, escena, cierre. Sin minutos muertos.",
+      },
+    ],
+  }),
+  project({
+    id: 16,
+    title: "Flexomed",
+    category: "Motion",
+    year: "2025",
+    client: "Flexomed",
+    label: "Motion",
+    statement:
+      "Flexomed fabrica, y el vídeo tenía que enseñarlo: proceso, máquina y producto con una lectura industrial clara.\n\nRodaje y montaje para que un proceso técnico se entienda en segundos. Sirve para web, feria y comercial.\n\nMenos explicación, más evidencia.",
+    deliverables: ["Vídeo industrial", "Producto en proceso", "Pieza comercial"],
+    sections: [
+      {
+        title: "Oficio en pantalla",
+        body: "La cámara se acerca al gesto y a la máquina. El resultado es una pieza que vende capacidad, no eslóganes.",
+      },
+    ],
+  }),
+  project({
+    id: 17,
+    title: "Auditorio Víctor Villegas",
+    category: "Fotografía",
+    year: "2025",
+    client: "Auditorio Víctor Villegas",
+    label: "Fotografía",
+    statement:
+      "El Auditorio Víctor Villegas es arquitectura y cultura a la vez. Fotografiamos el edificio y extraemos stills para que el recinto se lea a escala: butaca, foso, fachada.\n\nUn material híbrido, de reportaje y de campaña, pensado para programación, prensa e institucional.\n\nLa sala, antes de que baje el telón.",
+    deliverables: ["Fotografía de recinto", "Stills", "Material institucional"],
+    sections: [
+      {
+        title: "Escala y detalle",
+        body: "Pasamos del plano general al asiento. El auditorio se entiende como espacio y como promesa de directo.",
+      },
+    ],
+  }),
+  project({
+    id: 18,
+    title: "Guía San Javier",
+    category: "Fotografía",
+    year: "2025",
+    client: "San Javier",
+    label: "Editorial",
+    statement:
+      "Guía de San Javier: territorio, inmersión y una mirada editorial sobre el municipio. Fotografía para que el destino se desee, no solo se liste.\n\nLuz de costa, detalle y portada. Un set de imágenes para guía impresa y para digital.\n\nSan Javier, con criterio de publicación.",
+    deliverables: ["Fotografía editorial", "Portada", "Material de guía"],
+    sections: [
+      {
+        title: "Destino en páginas",
+        body: "Elegimos encuadres que funcionan en papel y en pantalla: aire, color y una lectura inmediata del lugar.",
+      },
+    ],
+  }),
+  project({
+    id: 19,
+    title: "Laura Rayos",
+    category: "Fotografía",
+    year: "2025",
+    client: "Laura Rayos",
+    label: "Fotografía",
+    statement:
+      "Sesión y piezas en movimiento para Laura Rayos: retrato, gesto y una dirección de arte que deja espacio al personaje.\n\nFotografía de alta definición y vídeos cortos para que la presencia se sostenga en redes y en web. Mismo tono, distinta duración.\n\nCerca, sin invadir.",
+    deliverables: ["Retrato", "Piezas en vídeo", "Selección para redes"],
+    sections: [
+      {
+        title: "Persona, no pose",
+        body: "Buscamos naturalidad dirigida: suficiente control para que la imagen aguante, suficiente verdad para que se reconozca.",
+      },
+    ],
+  }),
+  project({
+    id: 20,
+    title: "Saborea Águilas",
+    category: "Motion",
+    year: "2025",
+    client: "Saborea Águilas",
+    label: "Evento",
+    statement:
+      "Saborea Águilas es gastronomía y pueblo. Montamos el recap de la inauguración y del segundo día para que el festival se vea grande y cercano a la vez.\n\nDos piezas de resumen, pensadas para redes y para memoria del evento. Plato, gente y costa.\n\nEl sabor, en movimiento.",
+    deliverables: ["Recap de festival", "Edición 16:9", "Piezas de evento"],
+    sections: [
+      {
+        title: "Dos días, un relato",
+        body: "Inauguración y segundo día con el mismo criterio de montaje: ritmo, producto y público, sin perder el sitio.",
+      },
+    ],
+  }),
+  project({
+    id: 21,
+    title: "San Jorge · Dragon Day",
+    category: "Motion",
+    year: "2025",
+    client: "San Jorge",
+    label: "Aftermovie",
+    statement:
+      "Dragon Day de San Jorge: aftermovie de un día que se vive a tope. Montaje para que el recinto, el público y la marca queden en una sola pieza.\n\nRitmo de evento, cortes limpios y un cierre que invita a volver. Sirve para redes y para la siguiente edición.\n\nLa fiesta, condensada.",
+    deliverables: ["Aftermovie", "Edición de evento", "Pieza RRSS"],
+    sections: [
+      {
+        title: "Un día, una pieza",
+        body: "Seleccionamos lo que construye recuerdo: entrada, pico y cierre. El resto sobra.",
+      },
+    ],
+  }),
+  project({
+    id: 22,
+    title: "Fotos corporativas",
+    category: "Fotografía",
+    year: "2025",
+    client: "winup.",
+    label: "Fotografía",
+    statement:
+      "Fotografía de negocio para clínicas, restauración, deporte y producto. Un mismo oficio aplicado a marcas distintas: que se vea el trabajo real, con luz y con orden.\n\nDe la consulta al padel, del plato al equipo. Retrato corporativo y de espacio para web, ads y redes.\n\nEmpresas que se pueden enseñar.",
+    deliverables: ["Fotografía corporativa", "Espacio y equipo", "Producto"],
+    sections: [
+      {
+        title: "Negocios con cara",
+        body: "Cada sector pide un tono, pero el criterio es el mismo: claridad, oficio y fotos que se puedan usar de verdad.",
+      },
+    ],
+  }),
 ];
 
 /** Cover del proyecto (misma URL en espiral y detalle → sin parpadeo en la transición). */

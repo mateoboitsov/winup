@@ -20,13 +20,15 @@ function reelKey(item: ReelItem) {
 }
 
 export default function VerticalVideoCarousel({
-  items,
+  items = [],
   label = "Vídeos",
 }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [active, setActive] = useState(0);
   const [muted, setMuted] = useState(true);
+
+  const [inView, setInView] = useState(false);
 
   const hasVideo = items.some((item) => item.kind === "video");
 
@@ -71,17 +73,27 @@ export default function VerticalVideoCarousel({
   }, []);
 
   useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry?.isIntersecting ?? false),
+      { threshold: 0.35 }
+    );
+    io.observe(track);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
     videoRefs.current.forEach((video, i) => {
       if (!video) return;
       video.muted = muted;
-      if (i === active) {
+      if (inView && i === active) {
         void video.play().catch(() => {});
       } else {
         video.pause();
-        video.currentTime = 0;
       }
     });
-  }, [active, muted, items]);
+  }, [active, muted, items, inView]);
 
   if (items.length === 0) return null;
 
@@ -131,7 +143,11 @@ export default function VerticalVideoCarousel({
         </div>
       </div>
 
-      <div ref={trackRef} className="project-reels-track" data-lenis-prevent>
+      <div
+        ref={trackRef}
+        className="project-reels-track"
+        data-few={items.length === 1}
+      >
         {items.map((item, i) => (
           <figure
             key={reelKey(item)}
@@ -150,8 +166,10 @@ export default function VerticalVideoCarousel({
                   playsInline
                   loop
                   muted={muted}
-                  preload={i === 0 ? "metadata" : "none"}
+                  preload="none"
                   controls={false}
+                  disablePictureInPicture
+                  tabIndex={-1}
                 />
               ) : item.kind === "image" ? (
                 <img

@@ -19,10 +19,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .DS_Store
+__pycache__/
+*.py[cod]
 
 # vercel / netlify
 .vercel
 .netlify
+
+# originales de cliente (pesados, no van a GitHub)
+public/proyectos/
 
 # leads capturados por el bot
 data/leads.json
