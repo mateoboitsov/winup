@@ -1,3 +1,5 @@
+import { featuredCoverDataUrl } from "@/lib/featuredCover";
+
 export type ProjectVideo = {
   src: string;
   poster?: string;
@@ -9,6 +11,11 @@ export type ProjectSection = {
   body: string;
 };
 
+export type ProjectGallery = {
+  title: string;
+  images: string[];
+};
+
 export type Project = {
   id: number;
   title: string;
@@ -18,6 +25,8 @@ export type Project = {
   cover: string;
   /** Imágenes de galería (sin incluir el cover). */
   images: string[];
+  /** Galerías agrupadas (p. ej. fotos corporativas por cliente). */
+  galleries?: ProjectGallery[];
   /** Etiqueta corta de la sección manifiesto. */
   label: string;
   /** Texto largo de la sección manifiesto bajo el hero. */
@@ -28,11 +37,33 @@ export type Project = {
   videos?: ProjectVideo[];
   /** Entregables / alcance del proyecto. */
   deliverables?: string[];
+  /** Resumen corto al cierre de la ficha (opcional; si no hay, usa entregables). */
+  summary?: string;
   /** Cliente o marca. */
   client?: string;
   /** contain: portadas gráficas (no recortar logos ni tipografía). */
   heroFit?: "cover" | "contain";
+  /** Destacado en la espiral: tarjeta sin portada (color acento + cliente). */
+  featured?: boolean;
 };
+
+export type ProjectMediaKind = "video-only" | "mixed" | "photo-only";
+
+export function projectMediaKind(
+  project: Pick<Project, "images" | "videos">
+): ProjectMediaKind {
+  const hasImages = project.images.length > 0;
+  const hasVideos = (project.videos?.length ?? 0) > 0;
+  if (hasVideos && !hasImages) return "video-only";
+  if (hasVideos && hasImages) return "mixed";
+  return "photo-only";
+}
+
+export function isVideoOnlyProject(
+  project: Pick<Project, "images" | "videos">
+): boolean {
+  return projectMediaKind(project) === "video-only";
+}
 
 /** Codifica segmentos de ruta (espacios, tildes, ¡¿, etc.). */
 export function assetUrl(path: string) {
@@ -436,6 +467,7 @@ export const PROJECTS_DATA: Project[] = [
     category: "Fotografía",
     year: "2025",
     client: "winup.",
+    featured: true,
     label: "Fotografía",
     statement:
       "Fotografía de negocio para clínicas, restauración, deporte y producto. Un mismo oficio aplicado a marcas distintas: que se vea el trabajo real, con luz y con orden.\n\nDe la consulta al padel, del plato al equipo. Retrato corporativo y de espacio para web, ads y redes.\n\nEmpresas que se pueden enseñar.",
@@ -451,7 +483,12 @@ export const PROJECTS_DATA: Project[] = [
 
 /** Cover del proyecto (misma URL en espiral y detalle → sin parpadeo en la transición). */
 export function coverUrl(id: number) {
-  return assetUrl(getProject(id)?.cover ?? "");
+  const project = getProject(id);
+  if (!project) return "";
+  if (project.featured) {
+    return featuredCoverDataUrl(project.client ?? project.title);
+  }
+  return assetUrl(project.cover);
 }
 
 /** @deprecated Preferir coverUrl — se mantiene por compatibilidad. */

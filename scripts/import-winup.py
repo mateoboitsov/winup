@@ -22,9 +22,17 @@ MANIFEST = Path("/Users/mateoboitsov/Codigo/pablo climent/scripts/winup-manifest
 
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".heic", ".webp", ".tif", ".tiff"}
 VIDEO_EXT = {".mp4", ".mov", ".m4v"}
-CORPORATIVAS_GALLERY = 12
 COVER_SIZE = "1600x1600>"
 GALLERY_SIZE = "1600x1600>"
+
+
+def slugify(name: str) -> str:
+    import unicodedata
+
+    n = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii")
+    n = fold(n)
+    n = re.sub(r"[^a-z0-9]+", "-", n).strip("-")
+    return n or "otros"
 
 
 def fold(s: str) -> str:
@@ -135,28 +143,63 @@ def split_cover_gallery(imgs: list[ZipInfo]) -> tuple[ZipInfo | None, list[ZipIn
     return cover, gallery
 
 
-def pick_corporativas(infos: list[ZipInfo]) -> tuple[ZipInfo | None, list[ZipInfo]]:
+def corporativas_groups(infos: list[ZipInfo]) -> dict[str, list[ZipInfo]]:
     groups: dict[str, list[ZipInfo]] = defaultdict(list)
     for info in infos:
         if ext_of(info.filename) not in IMAGE_EXT:
             continue
         parts = info.filename.replace("\\", "/").split("/")
-        client = parts[1] if len(parts) > 1 else "otros"
+        if len(parts) < 3:
+            continue
+        client = parts[1]
+        # Solo la carpeta principal del cliente (sin subcarpetas anidadas).
+        if len(parts) != 3:
+            continue
         if "cañada" in fold(client) or "canada" in fold(client):
             continue
         groups[client].append(info)
 
-    selected: list[ZipInfo] = []
-    for client, files in sorted(groups.items(), key=lambda kv: fold(kv[0])):
-        files.sort(key=lambda i: i.file_size, reverse=True)
-        selected.extend(files[:2])
+    for client in groups:
+        groups[client].sort(key=lambda i: natural_key(i.filename))
+    return dict(sorted(groups.items(), key=lambda kv: fold(kv[0])))
 
-    selected.sort(key=lambda i: i.file_size, reverse=True)
-    if not selected:
-        return None, []
-    cover = selected[0]
-    gallery = [i for i in selected if i is not cover][:CORPORATIVAS_GALLERY]
-    return cover, gallery
+
+def import_corporativas(
+    zf: ZipFile,
+    dest: Path,
+    infos: list[ZipInfo],
+) -> dict:
+    groups = corporativas_groups(infos)
+    if not groups:
+        raise RuntimeError("Proyecto corporativas: sin carpetas de cliente")
+
+    galleries_meta: list[dict[str, str]] = []
+    cover_candidates: list[ZipInfo] = []
+    image_count = 0
+
+    for client, files in groups.items():
+        slug = slugify(client)
+        subdir = dest / slug
+        subdir.mkdir(parents=True, exist_ok=True)
+        for i, info in enumerate(files, start=1):
+            convert_image(zf, info, subdir / f"{i:02d}.jpg", GALLERY_SIZE, 80)
+            image_count += 1
+        cover_candidates.extend(files)
+        galleries_meta.append({"slug": slug, "title": client.strip()})
+
+    cover_candidates.sort(key=lambda i: i.file_size, reverse=True)
+    convert_image(zf, cover_candidates[0], dest / "cover.jpg", COVER_SIZE, 82)
+    (dest / "galleries.json").write_text(
+        json.dumps(galleries_meta, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    return {
+        "images": image_count,
+        "videos": 0,
+        "cover": True,
+        "galleries": len(galleries_meta),
+    }
 
 
 def import_project(
@@ -173,9 +216,10 @@ def import_project(
     dest.mkdir(parents=True)
 
     if corporativas:
-        cover, gallery = pick_corporativas(infos)
-    else:
-        cover, gallery = split_cover_gallery(images_of(infos))
+        corp = import_corporativas(zf, dest, infos)
+        return {"id": dest_id, **corp}
+
+    cover, gallery = split_cover_gallery(images_of(infos))
 
     videos = videos_of(infos)
     if max_videos is not None:

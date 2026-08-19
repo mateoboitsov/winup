@@ -24,7 +24,13 @@ export default function TransitionLink({
   };
 
   return (
-    <a href={href} className={className} onClick={onClick} {...rest}>
+    <a
+      href={href}
+      className={className}
+      onClick={onClick}
+      suppressHydrationWarning
+      {...rest}
+    >
       {children}
     </a>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { coverUrl } from "@/lib/projects";
@@ -21,21 +21,47 @@ const NAV_LINKS = [
 
 const SUBMENU_DURATION = 0.55;
 const SUBMENU_EASE = "power3.inOut";
+const MOBILE_BREAKPOINT = 720;
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return isMobile;
+}
 
 export default function SiteNav() {
   const router = useRouter();
   const pathname = usePathname();
   const onProject = /^\/proyecto\/\d+/.test(pathname);
+  const isMobile = useIsMobile();
   const [servicesOpen, setServicesOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [logoLeft, setLogoLeft] = useState(0);
   const barRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLButtonElement>(null);
   const servicesLinkRef = useRef<HTMLAnchorElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileServicesRef = useRef<HTMLDivElement>(null);
   const servicesOpenRef = useRef(false);
+  const mobileMenuOpenRef = useRef(false);
+  const mobileServicesOpenRef = useRef(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const splitRef = useRef<SplitText | null>(null);
+  const mobileSplitRef = useRef<SplitText | null>(null);
+  const mobileServicesSplitRef = useRef<SplitText | null>(null);
   const titlesTweenRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
+  const mobileMenuTweenRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
+  const mobileServicesTweenRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
 
   const syncLogoLeft = () => {
     const logo = logoRef.current;
@@ -48,6 +74,29 @@ export default function SiteNav() {
     titlesTweenRef.current = null;
     splitRef.current?.revert();
     splitRef.current = null;
+  };
+
+  const revertMobileSplit = () => {
+    mobileMenuTweenRef.current?.kill();
+    mobileMenuTweenRef.current = null;
+    mobileSplitRef.current?.revert();
+    mobileSplitRef.current = null;
+  };
+
+  const revertMobileServicesSplit = () => {
+    mobileServicesTweenRef.current?.kill();
+    mobileServicesTweenRef.current = null;
+    mobileServicesSplitRef.current?.revert();
+    mobileServicesSplitRef.current = null;
+  };
+
+  const resetMobileServicesPanel = () => {
+    const el = mobileServicesRef.current;
+    if (!el) return;
+    gsap.killTweensOf(el);
+    gsap.set(el, { height: 0 });
+    el.hidden = true;
+    el.setAttribute("aria-hidden", "true");
   };
 
   const openServices = () => {
@@ -114,7 +163,25 @@ export default function SiteNav() {
 
   useEffect(() => {
     setServicesOpen(false);
+    setMobileMenuOpen(false);
+    setMobileServicesOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileMenuOpen(false);
+      setMobileServicesOpen(false);
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     syncLogoLeft();
@@ -126,8 +193,162 @@ export default function SiteNav() {
     return () => {
       if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
       revertSplit();
+      revertMobileSplit();
+      revertMobileServicesSplit();
     };
   }, []);
+
+  useEffect(() => {
+    const el = mobileMenuRef.current;
+    if (!el || !isMobile) return;
+
+    const opening = mobileMenuOpen;
+    mobileMenuOpenRef.current = opening;
+    gsap.killTweensOf(el);
+
+    if (opening) {
+      el.hidden = false;
+      el.setAttribute("aria-hidden", "false");
+      el.style.pointerEvents = "auto";
+
+      revertMobileSplit();
+
+      const titles = el.querySelectorAll<HTMLElement>(".nav-mobile-title");
+      const split = SplitText.create(titles, {
+        type: "lines",
+        mask: "lines",
+      });
+      mobileSplitRef.current = split;
+      gsap.set(split.lines, { yPercent: 100 });
+
+      const tl = gsap.timeline();
+      tl.to(
+        el,
+        {
+          height: "auto",
+          duration: SUBMENU_DURATION,
+          ease: SUBMENU_EASE,
+          overwrite: true,
+        },
+        0
+      );
+      tl.to(
+        split.lines,
+        {
+          yPercent: 0,
+          duration: 0.6,
+          stagger: 0.05,
+          ease: "power3.out",
+          overwrite: true,
+        },
+        0.15
+      );
+      mobileMenuTweenRef.current = tl;
+      return;
+    }
+
+    const lines = mobileSplitRef.current?.lines;
+    if (lines?.length) {
+      gsap.to(lines, {
+        yPercent: 100,
+        duration: 0.35,
+        stagger: 0.03,
+        ease: "power3.in",
+        overwrite: true,
+      });
+    }
+
+    gsap.to(el, {
+      height: 0,
+      duration: SUBMENU_DURATION,
+      ease: SUBMENU_EASE,
+      overwrite: true,
+      delay: lines?.length ? 0.08 : 0,
+      onComplete: () => {
+        if (mobileMenuOpenRef.current) return;
+        revertMobileSplit();
+        revertMobileServicesSplit();
+        resetMobileServicesPanel();
+        el.hidden = true;
+        el.setAttribute("aria-hidden", "true");
+        el.style.pointerEvents = "none";
+      },
+    });
+  }, [mobileMenuOpen, isMobile]);
+
+  useEffect(() => {
+    const el = mobileServicesRef.current;
+    if (!el || !isMobile || !mobileMenuOpen) return;
+
+    const opening = mobileServicesOpen;
+    mobileServicesOpenRef.current = opening;
+    gsap.killTweensOf(el);
+
+    if (opening) {
+      el.hidden = false;
+      el.setAttribute("aria-hidden", "false");
+
+      revertMobileServicesSplit();
+
+      const titles = el.querySelectorAll<HTMLElement>(".nav-submenu-title");
+      const split = SplitText.create(titles, {
+        type: "lines",
+        mask: "lines",
+      });
+      mobileServicesSplitRef.current = split;
+      gsap.set(split.lines, { yPercent: 100 });
+
+      const tl = gsap.timeline();
+      tl.to(
+        el,
+        {
+          height: "auto",
+          duration: SUBMENU_DURATION,
+          ease: SUBMENU_EASE,
+          overwrite: true,
+        },
+        0
+      );
+      tl.to(
+        split.lines,
+        {
+          yPercent: 0,
+          duration: 0.55,
+          stagger: 0.04,
+          ease: "power3.out",
+          overwrite: true,
+        },
+        0.12
+      );
+      mobileServicesTweenRef.current = tl;
+      return;
+    }
+
+    const lines = mobileServicesSplitRef.current?.lines;
+    if (lines?.length) {
+      gsap.to(lines, {
+        yPercent: 100,
+        duration: 0.3,
+        stagger: 0.025,
+        ease: "power3.in",
+        overwrite: true,
+      });
+    }
+
+    gsap.to(el, {
+      height: 0,
+      duration: SUBMENU_DURATION,
+      ease: SUBMENU_EASE,
+      overwrite: true,
+      delay: lines?.length ? 0.06 : 0,
+      onComplete: () => {
+        if (mobileServicesOpenRef.current) return;
+        revertMobileServicesSplit();
+        el.hidden = true;
+        el.setAttribute("aria-hidden", "true");
+      },
+    });
+  }, [mobileServicesOpen, mobileMenuOpen, isMobile]);
 
   useEffect(() => {
     const el = submenuRef.current;
@@ -197,15 +418,21 @@ export default function SiteNav() {
   }, [servicesOpen]);
 
   useEffect(() => {
-    if (!servicesOpen) return;
+    if (!servicesOpen && !mobileMenuOpen) return;
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setServicesOpen(false);
+      if (e.key !== "Escape") return;
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+        setMobileServicesOpen(false);
+        return;
+      }
+      setServicesOpen(false);
     };
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [servicesOpen]);
+  }, [servicesOpen, mobileMenuOpen]);
 
   const goHome = () => {
     setServicesOpen(false);
@@ -297,6 +524,8 @@ export default function SiteNav() {
       return;
     }
     setServicesOpen(false);
+    setMobileMenuOpen(false);
+    setMobileServicesOpen(false);
     if (href === "/") {
       goHome();
       return;
@@ -304,10 +533,35 @@ export default function SiteNav() {
     navigateWithPageTransition(router, href);
   };
 
+  const onMobileNavClick = (href: string, label: string) => {
+    if (label === "Servicios") {
+      setMobileServicesOpen((open) => !open);
+      return;
+    }
+    onNavClick(href, label);
+  };
+
+  const onMobileServiceClick = (slug: string) => {
+    setMobileMenuOpen(false);
+    setMobileServicesOpen(false);
+    forceCloseServices();
+    navigateWithPageTransition(router, serviceHref(slug));
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((open) => {
+      if (open) {
+        setMobileServicesOpen(false);
+        return false;
+      }
+      return true;
+    });
+  };
+
   return (
     <div
       ref={barRef}
-      className={`site-nav-bar${servicesOpen ? " is-services-open" : ""}`}
+      className={`site-nav-bar${servicesOpen ? " is-services-open" : ""}${mobileMenuOpen ? " is-mobile-open" : ""}`}
       style={{
         position: "fixed",
         top: 0,
@@ -337,7 +591,8 @@ export default function SiteNav() {
             onClick={goHome}
           >
             <ArrowLeft size={16} strokeWidth={2.25} color="currentColor" />
-            Volver a todos los proyectos
+            <span className="nav-back-label nav-back-label--full">Volver a todos los proyectos</span>
+            <span className="nav-back-label nav-back-label--short">Volver</span>
           </button>
         </div>
         <ul className="nav-links">
@@ -345,8 +600,8 @@ export default function SiteNav() {
             <li
               key={label}
               className={label === "Servicios" ? "nav-item-services" : undefined}
-              onMouseEnter={label === "Servicios" ? openServices : undefined}
-              onMouseLeave={label === "Servicios" ? closeServices : undefined}
+              onMouseEnter={!isMobile && label === "Servicios" ? openServices : undefined}
+              onMouseLeave={!isMobile && label === "Servicios" ? closeServices : undefined}
             >
               <a
                 ref={label === "Servicios" ? servicesLinkRef : undefined}
@@ -354,6 +609,7 @@ export default function SiteNav() {
                 href={href}
                 aria-expanded={label === "Servicios" ? servicesOpen : undefined}
                 aria-controls={label === "Servicios" ? "nav-services-submenu" : undefined}
+                suppressHydrationWarning
                 onClick={(e) => {
                   e.preventDefault();
                   onNavClick(href, label);
@@ -364,12 +620,107 @@ export default function SiteNav() {
             </li>
           ))}
         </ul>
+        <button
+          type="button"
+          className={`nav-toggle ui-label${mobileMenuOpen ? " is-active" : ""}`}
+          aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="nav-mobile-panel"
+          onClick={toggleMobileMenu}
+        >
+          {mobileMenuOpen ? "Cerrar" : "Menú"}
+        </button>
       </nav>
+
+      <div
+        ref={mobileMenuRef}
+        id="nav-mobile-panel"
+        className="nav-mobile-panel"
+        hidden
+        aria-hidden="true"
+      >
+        <div className="nav-mobile-inner content-width">
+          <ul className="nav-mobile-links">
+            {NAV_LINKS.map(({ label, href }) => (
+              <li key={label}>
+                {label === "Servicios" ? (
+                  <button
+                    type="button"
+                    className={`nav-mobile-expand${mobileServicesOpen ? " is-active" : ""}`}
+                    aria-expanded={mobileServicesOpen}
+                    aria-controls="nav-mobile-services"
+                    onClick={() => setMobileServicesOpen((open) => !open)}
+                  >
+                    <span className="nav-mobile-title nav-submenu-title">{label}</span>
+                    <span className="nav-mobile-expand-meta">
+                      <span className="nav-mobile-expand-label ui-label">
+                        {mobileServicesOpen ? "Ocultar" : "Ver servicios"}
+                      </span>
+                      <ChevronDown
+                        size={18}
+                        strokeWidth={2.25}
+                        className={`nav-mobile-expand-icon accent-arrow${mobileServicesOpen ? " is-open" : ""}`}
+                        aria-hidden
+                      />
+                    </span>
+                  </button>
+                ) : (
+                  <a
+                    className="nav-mobile-title nav-submenu-title"
+                    href={href}
+                    suppressHydrationWarning
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onMobileNavClick(href, label);
+                    }}
+                  >
+                    {label}
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <div
+            ref={mobileServicesRef}
+            id="nav-mobile-services"
+            className="nav-mobile-services-panel"
+            hidden
+            aria-hidden="true"
+          >
+            <div className="nav-mobile-services-inner">
+              <span className="nav-submenu-badge">Nuestros servicios</span>
+              <ul className="nav-submenu-list">
+                {SERVICES.map((service) => (
+                  <li key={service.slug}>
+                    <a
+                      className="nav-submenu-title"
+                      href={serviceHref(service.slug)}
+                      suppressHydrationWarning
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onMobileServiceClick(service.slug);
+                      }}
+                    >
+                      {service.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div
         className="nav-services-overlay"
         aria-hidden="true"
         onMouseEnter={closeServices}
+        onClick={() => {
+          if (!isMobile) return;
+          setMobileMenuOpen(false);
+          setMobileServicesOpen(false);
+        }}
       />
 
       <div
@@ -390,6 +741,7 @@ export default function SiteNav() {
                 <a
                   className="nav-submenu-title"
                   href={serviceHref(service.slug)}
+                  suppressHydrationWarning
                   onClick={(e) => {
                     e.preventDefault();
                     forceCloseServices();

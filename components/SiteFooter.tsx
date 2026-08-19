@@ -26,13 +26,24 @@ export default function SiteFooter() {
                   href="https://instagram.com"
                   target="_blank"
                   rel="noreferrer"
+                  suppressHydrationWarning
                 >
                   Instagram
                 </a>
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer">
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  suppressHydrationWarning
+                >
                   LinkedIn
                 </a>
-                <a href="https://tiktok.com" target="_blank" rel="noreferrer">
+                <a
+                  href="https://tiktok.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  suppressHydrationWarning
+                >
                   TikTok
                 </a>
               </nav>
@@ -45,7 +56,9 @@ export default function SiteFooter() {
               <TransitionLink href="/legal/privacidad">Privacidad</TransitionLink>
               <TransitionLink href="/legal/cookies">Cookies</TransitionLink>
             </nav>
-            <p className="site-footer-copy">© {year} winup.</p>
+            <p className="site-footer-copy" suppressHydrationWarning>
+              © {year} winup.
+            </p>
           </div>
         </div>
       </div>

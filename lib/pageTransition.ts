@@ -387,7 +387,7 @@ export function playPageEnter(el: HTMLElement) {
         // flujo (absolute/fixed). Si quitamos `height`, el contenedor colapsa a 0
         // y la viñeta (inset:0) "desaparece".
         el.style.width = isSpiral ? "100vw" : "";
-        el.style.height = isSpiral ? "100vh" : "";
+        el.style.height = isSpiral ? "100dvh" : "";
         el.style.maxHeight = "";
         el.style.overflow = isSpiral ? "hidden" : "";
         el.style.pointerEvents = "";

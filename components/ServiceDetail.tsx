@@ -6,12 +6,39 @@ import gsap from "gsap";
 import { Plus } from "lucide-react";
 import { type Service } from "@/lib/services";
 import ContactForm from "@/components/ContactForm";
+import VerticalVideoCarousel, { type ReelItem } from "@/components/VerticalVideoCarousel";
 
 gsap.registerPlugin(useGSAP);
+
+function serviceReelItems(service: Service): ReelItem[] {
+  return (service.showcaseItems ?? [])
+    .filter((item) => item.src.trim().length > 0)
+    .map((item) => {
+      if (item.kind === "video") {
+        return {
+          kind: "video" as const,
+          src: item.src,
+          poster: item.poster,
+          caption: item.caption,
+        };
+      }
+      return {
+        kind: "image" as const,
+        src: item.src,
+        caption: item.caption,
+      };
+    });
+}
+
+function usesFusedMetrics(service: Service) {
+  return service.slug === "publicidad" || service.slug === "seo";
+}
 
 export default function ServiceDetail({ service }: { service: Service }) {
   const container = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const showcaseItems = serviceReelItems(service);
+  const fusedMetrics = usesFusedMetrics(service);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -84,21 +111,72 @@ export default function ServiceDetail({ service }: { service: Service }) {
         </div>
       </section>
 
-      {/* ── Casos de éxito ───────────────────────────────────────────── */}
-      {service.cases && service.cases.length > 0 && (
-        <section className="service-cases">
+      {/* ── Métricas ─────────────────────────────────────────────────── */}
+      {service.metrics && service.metrics.length > 0 && (
+        <section
+          className={`service-metrics${fusedMetrics ? " is-fused" : ""}`}
+        >
           <div className="content-width">
-            {service.casesTitle && (
-              <h2 className="service-cases-title">{service.casesTitle}</h2>
+            {service.metricsTitle && (
+              <h2 className="service-cases-title">{service.metricsTitle}</h2>
             )}
-            <div className="service-cases-grid">
-              {service.cases.map((c, i) => (
-                <div key={i} className="service-case-card">
-                  <div className="service-case-thumb" aria-hidden />
-                  <p className="service-case-result">{c.result}</p>
+            <div className="service-metrics-grid">
+              {service.metrics.map((metric) => (
+                <div key={`${metric.label}-${metric.value}`} className="service-metric-card">
+                  {fusedMetrics ? (
+                    <>
+                      <p className="service-metric-value">{metric.value}</p>
+                      <p className="service-metric-copy">
+                        <span className="service-metric-label">{metric.label}</span>
+                        {metric.detail ? ` ${metric.detail}` : ""}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="service-metric-label">{metric.label}</p>
+                      <p className="service-metric-value">{metric.value}</p>
+                      <p className="service-metric-detail">{metric.detail}</p>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Carrusel visual ──────────────────────────────────────────── */}
+      {service.showcaseLabel && (
+        showcaseItems.length > 0 ? (
+          <VerticalVideoCarousel items={showcaseItems} label={service.showcaseLabel} />
+        ) : (
+          <section className="service-cases">
+            <div className="content-width">
+              <h2 className="service-cases-title">{service.showcaseLabel}</h2>
+              <p className="service-showcase-pending">
+                Pendiente de cargar imágenes o vídeos.
+              </p>
+            </div>
+          </section>
+        )
+      )}
+
+      {/* ── Diagrama ─────────────────────────────────────────────────── */}
+      {service.diagramLabel && (
+        <section className="service-diagram">
+          <div className="content-width">
+            <h2 className="service-cases-title">{service.diagramLabel}</h2>
+            {service.diagramSrc ? (
+              <img
+                className="service-diagram-img"
+                src={service.diagramSrc}
+                alt={service.diagramLabel}
+              />
+            ) : (
+              <div className="service-diagram-placeholder" aria-label="Diagrama pendiente">
+                <span>Pendiente de cargar</span>
+              </div>
+            )}
           </div>
         </section>
       )}

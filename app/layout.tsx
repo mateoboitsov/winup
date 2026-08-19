@@ -22,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={bricolage.variable}>
-      <body className={bricolage.className}>
+    <html lang="es" className={bricolage.variable} suppressHydrationWarning>
+      <body className={bricolage.className} suppressHydrationWarning>
         <SiteNav />
         <LenisSmoothScroll />
         {children}

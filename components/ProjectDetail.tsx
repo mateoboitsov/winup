@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ArrowRight } from "lucide-react";
-import { getNextProject, coverUrl, assetUrl, type Project } from "@/lib/projects";
+import { getNextProject, coverUrl, assetUrl, isVideoOnlyProject, type Project, type ProjectSection } from "@/lib/projects";
 import { transition } from "@/lib/transition";
 import SiteFooter from "@/components/SiteFooter";
+import PhotoCarousel from "@/components/PhotoCarousel";
+import StickyProjectVideo from "@/components/StickyProjectVideo";
 import VerticalVideoCarousel, { type ReelItem } from "@/components/VerticalVideoCarousel";
 
 gsap.registerPlugin(useGSAP);
@@ -109,19 +111,88 @@ function GalleryBlock({ slots }: { slots: GallerySlot[] }) {
   );
 }
 
+function ProjectHighlightBlock({ sections }: { sections: ProjectSection[] }) {
+  if (sections.length === 0) return null;
+
+  return (
+    <section className="project-highlight" aria-label="Detalle del proyecto">
+      <div className="content-width">
+        <div className="project-highlight-inner">
+          <p className="project-highlight-body">
+            {sections.map((section) => section.body).join(" ")}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProjectSummaryBlock({
+  summary,
+  deliverables,
+}: {
+  summary?: string;
+  deliverables?: string[];
+}) {
+  const text =
+    summary ?? (deliverables?.length ? deliverables.join(" · ") : "");
+  if (!text) return null;
+
+  return (
+    <section className="project-summary" aria-label="Resumen">
+      <div className="content-width manifesto-grid">
+        <p className="manifesto-label ui-label">Resumen</p>
+        <div className="project-summary-copy">
+          <p className="project-summary-paragraph">{text}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProjectSectionBlock({
+  section,
+  className = "",
+}: {
+  section: ProjectSection;
+  className?: string;
+}) {
+  return (
+    <section className={`manifesto service-manifesto project-section ${className}`.trim()}>
+      <div className="manifesto-grid">
+        <p className="manifesto-label ui-label">{section.title}</p>
+        <div>
+          <p className="manifesto-body service-manifesto-body">{section.body}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function ProjectDetail({ project }: { project: Project }) {
   const router = useRouter();
   const container = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLImageElement>(null);
   const nextProject = getNextProject(project.id);
   const containHero = project.heroFit === "contain";
+  const videoOnly = isVideoOnlyProject(project);
 
   const sections = project.sections ?? [];
-  const gallerySlots = gallerySlotsOf(project.images);
-  const splitAt = Math.max(Math.ceil(gallerySlots.length / 2), 1);
-  const firstGallery = gallerySlots.slice(0, splitAt);
-  const restGallery = gallerySlots.slice(splitAt);
+  const hasGroupedGalleries = (project.galleries?.length ?? 0) > 0;
+  const usePhotoCarousel =
+    !hasGroupedGalleries && project.images.length >= 5;
+  const imageSplitAt = Math.max(Math.ceil(project.images.length / 2), 1);
+  const carouselPhotos = usePhotoCarousel
+    ? project.images.slice(0, imageSplitAt)
+    : [];
+  const restGallery = hasGroupedGalleries
+    ? []
+    : gallerySlotsOf(
+        usePhotoCarousel ? project.images.slice(imageSplitAt) : project.images
+      );
   const reelItems = reelItemsOf(project.videos);
+  const heroVideoSrc =
+    videoOnly && reelItems[0]?.kind === "video" ? reelItems[0].src : null;
 
   const goToNextProject = () => {
     const img = previewRef.current;
@@ -233,7 +304,7 @@ export default function ProjectDetail({ project }: { project: Project }) {
     <div
       ref={container}
       data-page="project"
-      className="project-detail"
+      className={`project-detail${videoOnly ? " is-video-only" : ""}`}
       style={{
         position: "relative",
         width: "100%",
@@ -242,157 +313,236 @@ export default function ProjectDetail({ project }: { project: Project }) {
         overflowX: "hidden",
       }}
     >
-      {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section
-        className={containHero ? "project-hero is-contain" : "project-hero"}
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "100vh",
-          overflow: "hidden",
-          background: containHero ? "#101010" : undefined,
-        }}
-      >
-        <img
-          data-hero
-          src={coverUrl(project.id)}
-          crossOrigin="anonymous"
-          decoding="sync"
-          alt={project.title}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: containHero ? "contain" : "cover",
-            objectPosition: "center",
-          }}
-        />
-
-        <div
-          className="hero-gradient-fade"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: containHero
-              ? "linear-gradient(to top, rgba(5,5,5,0.55) 0%, transparent 34%)"
-              : "linear-gradient(to top, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 42%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: "clamp(2rem, 6vw, 5rem)",
-            padding: "0 clamp(1.5rem, 5vw, 4.5rem)",
-          }}
+      {videoOnly && heroVideoSrc ? (
+        <StickyProjectVideo
+          projectId={project.id}
+          videoSrc={heroVideoSrc}
+          title={project.title}
         >
-          <div className="content-width">
-            <p
-              className="reveal ui-label"
-              style={{ color: "var(--accent)", marginBottom: "0.75rem" }}
-            >
-              {project.category} · {project.year}
-            </p>
-            <h1
-              className="reveal project-hero-title"
-              style={{
-                fontSize: "clamp(3.5rem, 10vw, 8rem)",
-                fontWeight: 800,
-                lineHeight: 1.02,
-                color: "#fff",
-                textAlign: "left",
-                maxWidth: "14ch",
-              }}
-            >
-              {project.title}
-            </h1>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Meta ─────────────────────────────────────────────────────── */}
-      {(project.client || (project.deliverables && project.deliverables.length > 0)) && (
-        <section className="project-meta">
-          <div className="content-width project-meta-grid">
-            {project.client && (
-              <div className="project-meta-item">
-                <p className="ui-label project-meta-label">Cliente</p>
-                <p className="project-meta-value">{project.client}</p>
+          {/* ── Hero (título sobre vídeo fijo) ─────────────────────────── */}
+          <section className="project-hero is-video-hero video-sticky-hero">
+            <div className="hero-gradient-fade video-sticky-hero-gradient" />
+            <div className="video-sticky-hero-inner">
+              <div className="content-width">
+                <p
+                  className="reveal ui-label"
+                  style={{ color: "var(--accent)", marginBottom: "0.75rem" }}
+                >
+                  {project.category} · {project.year}
+                </p>
+                <h1
+                  className="reveal project-hero-title"
+                  style={{
+                    fontSize: "clamp(3.5rem, 10vw, 8rem)",
+                    fontWeight: 800,
+                    lineHeight: 1.02,
+                    color: "#fff",
+                    textAlign: "left",
+                    maxWidth: "14ch",
+                  }}
+                >
+                  {project.title}
+                </h1>
               </div>
-            )}
-            <div className="project-meta-item">
-              <p className="ui-label project-meta-label">Año</p>
-              <p className="project-meta-value">{project.year}</p>
             </div>
-            <div className="project-meta-item">
-              <p className="ui-label project-meta-label">Categoría</p>
-              <p className="project-meta-value">{project.category}</p>
-            </div>
-            {project.deliverables && project.deliverables.length > 0 && (
-              <div className="project-meta-item project-meta-deliverables">
-                <p className="ui-label project-meta-label">Alcance</p>
-                <p className="project-meta-value">{project.deliverables.join(" · ")}</p>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+          </section>
 
-      {/* ── Manifiesto ───────────────────────────────────────────────── */}
-      <section className="manifesto service-manifesto">
-        <div className="manifesto-grid">
-          <p
-            className="manifesto-label ui-label"
+          {(project.client || (project.deliverables && project.deliverables.length > 0)) && (
+            <section className="project-meta video-sticky-block">
+              <div className="content-width project-meta-grid">
+                {project.client && (
+                  <div className="project-meta-item">
+                    <p className="ui-label project-meta-label">Cliente</p>
+                    <p className="project-meta-value">{project.client}</p>
+                  </div>
+                )}
+                <div className="project-meta-item">
+                  <p className="ui-label project-meta-label">Año</p>
+                  <p className="project-meta-value">{project.year}</p>
+                </div>
+                <div className="project-meta-item">
+                  <p className="ui-label project-meta-label">Categoría</p>
+                  <p className="project-meta-value">{project.category}</p>
+                </div>
+                {project.deliverables && project.deliverables.length > 0 && (
+                  <div className="project-meta-item project-meta-deliverables">
+                    <p className="ui-label project-meta-label">Alcance</p>
+                    <p className="project-meta-value">{project.deliverables.join(" · ")}</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          <section
+            className={`manifesto service-manifesto video-sticky-block${sections.length === 0 ? " video-sticky-last" : ""}`}
+          >
+            <div className="manifesto-grid">
+              <p className="manifesto-label ui-label">{project.label}</p>
+              <div>
+                <p
+                  className="manifesto-body service-manifesto-body"
+                  style={{ userSelect: "text", whiteSpace: "pre-line" }}
+                >
+                  {project.statement}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {sections.map((section, i) => (
+            <ProjectSectionBlock
+              key={section.title}
+              section={section}
+              className={`video-sticky-block${i === sections.length - 1 ? " video-sticky-last" : ""}`}
+            />
+          ))}
+        </StickyProjectVideo>
+      ) : (
+        <>
+          {/* ── Hero ─────────────────────────────────────────────────── */}
+          <section
+            className={containHero ? "project-hero is-contain" : "project-hero"}
             style={{
-              paddingTop: "0.35em",
-              userSelect: "text",
+              position: "relative",
+              width: "100%",
+              height: "100vh",
+              overflow: "hidden",
+              background: containHero ? "#101010" : undefined,
             }}
           >
-            {project.label}
-          </p>
-          <div>
-            <p className="manifesto-body service-manifesto-body" style={{ userSelect: "text", whiteSpace: "pre-line" }}>
-              {project.statement}
-            </p>
-          </div>
-        </div>
-      </section>
+            <img
+              data-hero
+              src={coverUrl(project.id)}
+              crossOrigin="anonymous"
+              decoding="sync"
+              alt={project.title}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: containHero ? "contain" : "cover",
+                objectPosition: "center",
+              }}
+            />
 
-      {/* ── Galería (primera mitad) ──────────────────────────────────── */}
-      <GalleryBlock slots={firstGallery} />
+            <div
+              className="hero-gradient-fade"
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: containHero
+                  ? "linear-gradient(to top, rgba(5,5,5,0.55) 0%, transparent 34%)"
+                  : "linear-gradient(to top, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 42%, transparent 70%)",
+                pointerEvents: "none",
+              }}
+            />
 
-      {/* ── Sección de texto 1 ───────────────────────────────────────── */}
-      {sections[0] && (
-        <section className="project-section">
-          <div className="content-width project-section-grid">
-            <p className="ui-label project-section-label">{sections[0].title}</p>
-            <p className="project-section-body">{sections[0].body}</p>
-          </div>
-        </section>
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: "clamp(2rem, 6vw, 5rem)",
+                padding: "0 clamp(1.5rem, 5vw, 4.5rem)",
+              }}
+            >
+              <div className="content-width">
+                <p
+                  className="reveal ui-label"
+                  style={{ color: "var(--accent)", marginBottom: "0.75rem" }}
+                >
+                  {project.category} · {project.year}
+                </p>
+                <h1
+                  className="reveal project-hero-title"
+                  style={{
+                    fontSize: "clamp(3.5rem, 10vw, 8rem)",
+                    fontWeight: 800,
+                    lineHeight: 1.02,
+                    color: "#fff",
+                    textAlign: "left",
+                    maxWidth: "14ch",
+                  }}
+                >
+                  {project.title}
+                </h1>
+              </div>
+            </div>
+          </section>
+
+          {(project.client || (project.deliverables && project.deliverables.length > 0)) && (
+            <section className="project-meta">
+              <div className="content-width project-meta-grid">
+                {project.client && (
+                  <div className="project-meta-item">
+                    <p className="ui-label project-meta-label">Cliente</p>
+                    <p className="project-meta-value">{project.client}</p>
+                  </div>
+                )}
+                <div className="project-meta-item">
+                  <p className="ui-label project-meta-label">Año</p>
+                  <p className="project-meta-value">{project.year}</p>
+                </div>
+                <div className="project-meta-item">
+                  <p className="ui-label project-meta-label">Categoría</p>
+                  <p className="project-meta-value">{project.category}</p>
+                </div>
+                {project.deliverables && project.deliverables.length > 0 && (
+                  <div className="project-meta-item project-meta-deliverables">
+                    <p className="ui-label project-meta-label">Alcance</p>
+                    <p className="project-meta-value">{project.deliverables.join(" · ")}</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          <section className="manifesto service-manifesto">
+            <div className="manifesto-grid">
+              <p className="manifesto-label ui-label">{project.label}</p>
+              <div>
+                <p
+                  className="manifesto-body service-manifesto-body"
+                  style={{ userSelect: "text", whiteSpace: "pre-line" }}
+                >
+                  {project.statement}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <PhotoCarousel images={carouselPhotos} label="Galería" />
+
+          {project.galleries?.map((gallery) => (
+            <PhotoCarousel
+              key={gallery.title}
+              images={gallery.images}
+              label={gallery.title}
+            />
+          ))}
+
+          <ProjectHighlightBlock sections={sections} />
+
+          <VerticalVideoCarousel
+            items={reelItems}
+            label="Vídeos"
+            modalTitle={project.title}
+          />
+
+          <GalleryBlock slots={restGallery} />
+
+          <ProjectSummaryBlock
+            summary={project.summary}
+            deliverables={project.deliverables}
+          />
+        </>
       )}
-
-      {/* ── Carrusel vertical ────────────────────────────────────────── */}
-      <VerticalVideoCarousel items={reelItems} label="Vídeos" />
-
-      {/* ── Sección de texto 2+ ──────────────────────────────────────── */}
-      {sections.slice(1).map((section) => (
-        <section key={section.title} className="project-section">
-          <div className="content-width project-section-grid">
-            <p className="ui-label project-section-label">{section.title}</p>
-            <p className="project-section-body">{section.body}</p>
-          </div>
-        </section>
-      ))}
-
-      {/* ── Galería (resto) ──────────────────────────────────────────── */}
-      <GalleryBlock slots={restGallery} />
 
       {/* ── Siguiente proyecto ───────────────────────────────────────── */}
       <section
+        className="project-next-section"
         style={{
           background: "var(--bg-soft)",
           borderTop: "1px solid rgba(200,255,0,0.2)",

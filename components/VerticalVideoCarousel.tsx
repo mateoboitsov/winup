@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { assetUrl, type ProjectVideo } from "@/lib/projects";
+import VideoPlayerModal from "@/components/VideoPlayerModal";
 
 export type ReelItem =
   | (ProjectVideo & { kind: "video" })
@@ -12,6 +13,8 @@ export type ReelItem =
 type Props = {
   items: ReelItem[];
   label?: string;
+  variant?: "default" | "cinematic";
+  modalTitle?: string;
 };
 
 function reelKey(item: ReelItem) {
@@ -19,18 +22,74 @@ function reelKey(item: ReelItem) {
   return `${item.kind}-${item.src}`;
 }
 
+function CarouselHeader({
+  label,
+  showControls,
+  onPrev,
+  onNext,
+  active,
+  total,
+}: {
+  label: string;
+  showControls: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  active: number;
+  total: number;
+}) {
+  return (
+    <div className="project-carousel-header-bar">
+      <div className="content-width project-reels-header">
+        <p className="ui-label" style={{ color: "var(--accent)" }}>
+          {label}
+        </p>
+        {showControls && total > 1 && (
+          <div className="project-reels-controls">
+            <button
+              type="button"
+              className="project-reels-nav"
+              onClick={onPrev}
+              disabled={active === 0}
+              aria-label="Anterior"
+            >
+              <ChevronLeft size={18} strokeWidth={2.25} />
+            </button>
+            <button
+              type="button"
+              className="project-reels-nav"
+              onClick={onNext}
+              disabled={active === total - 1}
+              aria-label="Siguiente"
+            >
+              <ChevronRight size={18} strokeWidth={2.25} />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function VerticalVideoCarousel({
   items = [],
   label = "Vídeos",
+  variant = "default",
+  modalTitle,
 }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const singleRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLVideoElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [active, setActive] = useState(0);
-  const [muted, setMuted] = useState(true);
-
   const [inView, setInView] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalIndex, setModalIndex] = useState<number | null>(null);
 
-  const hasVideo = items.some((item) => item.kind === "video");
+  const singleVideo =
+    items.length === 1 && items[0]?.kind === "video" ? items[0] : null;
+  const modalItem = modalIndex !== null ? items[modalIndex] : null;
+  const carouselModalOpen = modalIndex !== null && modalItem?.kind === "video";
+  const playbackTitle = modalTitle ?? label;
 
   const scrollToIndex = useCallback((index: number) => {
     const track = trackRef.current;
@@ -49,6 +108,7 @@ export default function VerticalVideoCarousel({
   };
 
   useEffect(() => {
+    if (singleVideo) return;
     const track = trackRef.current;
     if (!track) return;
 
@@ -70,84 +130,132 @@ export default function VerticalVideoCarousel({
 
     track.addEventListener("scroll", onScroll, { passive: true });
     return () => track.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [singleVideo]);
 
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
+    const target = singleVideo ? singleRef.current : trackRef.current;
+    if (!target) return;
     const io = new IntersectionObserver(
       ([entry]) => setInView(entry?.isIntersecting ?? false),
       { threshold: 0.35 }
     );
-    io.observe(track);
+    io.observe(target);
     return () => io.disconnect();
-  }, []);
+  }, [singleVideo]);
 
   useEffect(() => {
-    videoRefs.current.forEach((video, i) => {
+    if (singleVideo) return;
+    videoRefs.current.forEach((video) => {
       if (!video) return;
-      video.muted = muted;
-      if (inView && i === active) {
+      if (video.readyState === 0) video.load();
+    });
+  }, [items, singleVideo]);
+
+  useEffect(() => {
+    if (singleVideo) {
+      const video = previewRef.current;
+      if (!video) return;
+      if (modalOpen) {
+        video.pause();
+      } else if (inView) {
         void video.play().catch(() => {});
       } else {
         video.pause();
       }
+      return;
+    }
+
+    if (modalOpen || carouselModalOpen) {
+      videoRefs.current.forEach((video) => video?.pause());
+      return;
+    }
+
+    videoRefs.current.forEach((video, i) => {
+      if (!video) return;
+      video.muted = true;
+      if (inView && i === active) {
+        void video.play().catch(() => {});
+      } else {
+        video.pause();
+        if (video.readyState >= 1) {
+          video.currentTime = 0;
+        }
+      }
     });
-  }, [active, muted, items, inView]);
+  }, [active, items, inView, singleVideo, modalOpen, carouselModalOpen]);
 
   if (items.length === 0) return null;
 
-  return (
-    <section className="project-reels" aria-label={label}>
-      <div className="content-width project-reels-header">
-        <p className="ui-label" style={{ color: "var(--accent)" }}>
-          {label}
-        </p>
-        <div className="project-reels-controls">
-          {hasVideo && (
-            <button
-              type="button"
-              className="project-reels-mute"
-              onClick={() => setMuted((m) => !m)}
-              aria-label={muted ? "Activar sonido" : "Silenciar"}
-            >
-              {muted ? (
-                <VolumeX size={16} strokeWidth={2.25} />
-              ) : (
-                <Volume2 size={16} strokeWidth={2.25} />
-              )}
-            </button>
-          )}
-          {items.length > 1 && (
-            <>
-              <button
-                type="button"
-                className="project-reels-nav"
-                onClick={() => go(-1)}
-                disabled={active === 0}
-                aria-label="Anterior"
-              >
-                <ChevronLeft size={18} strokeWidth={2.25} />
-              </button>
-              <button
-                type="button"
-                className="project-reels-nav"
-                onClick={() => go(1)}
-                disabled={active === items.length - 1}
-                aria-label="Siguiente"
-              >
-                <ChevronRight size={18} strokeWidth={2.25} />
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div
-        ref={trackRef}
-        className="project-reels-track"
-        data-few={items.length === 1}
+  if (singleVideo) {
+    return (
+      <section
+        className={`project-reels is-single-video${variant === "cinematic" ? " is-cinematic" : ""}`}
+        aria-label={label}
       >
+        <div ref={singleRef} className="project-reels-single">
+          <figure className="project-reel-slide project-reel-slide--solo" data-active="true">
+            <div className="project-reel-frame">
+              <video
+                ref={previewRef}
+                className="project-reel-video"
+                src={assetUrl(singleVideo.src)}
+                poster={
+                  singleVideo.poster ? assetUrl(singleVideo.poster) : undefined
+                }
+                playsInline
+                loop
+                muted
+                preload="auto"
+                controls={false}
+                disablePictureInPicture
+                tabIndex={-1}
+              />
+              <button
+                type="button"
+                className="project-reel-play is-visible"
+                onClick={() => setModalOpen(true)}
+                aria-label={`Reproducir ${playbackTitle}`}
+              >
+                <span className="project-reel-play-icon" aria-hidden="true">
+                  <span className="project-reel-play-ring" aria-hidden="true" />
+                  <Play size={28} strokeWidth={2} fill="currentColor" />
+                </span>
+              </button>
+            </div>
+            {singleVideo.caption && (
+              <figcaption className="project-reel-caption">
+                {singleVideo.caption}
+              </figcaption>
+            )}
+          </figure>
+        </div>
+
+        <VideoPlayerModal
+          open={modalOpen}
+          src={singleVideo.src}
+          poster={singleVideo.poster}
+          title={playbackTitle}
+          onClose={() => setModalOpen(false)}
+        />
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className={`project-reels${variant === "cinematic" ? " is-cinematic" : ""}`}
+      aria-label={label}
+    >
+      <CarouselHeader
+        label={label}
+        showControls
+        onPrev={() => go(-1)}
+        onNext={() => go(1)}
+        active={active}
+        total={items.length}
+      />
+
+      <div ref={trackRef} className="project-reels-track">
         {items.map((item, i) => (
           <figure
             key={reelKey(item)}
@@ -156,21 +264,34 @@ export default function VerticalVideoCarousel({
           >
             <div className="project-reel-frame">
               {item.kind === "video" ? (
-                <video
-                  ref={(el) => {
-                    videoRefs.current[i] = el;
-                  }}
-                  className="project-reel-video"
-                  src={assetUrl(item.src)}
-                  poster={item.poster ? assetUrl(item.poster) : undefined}
-                  playsInline
-                  loop
-                  muted={muted}
-                  preload="none"
-                  controls={false}
-                  disablePictureInPicture
-                  tabIndex={-1}
-                />
+                <>
+                  <video
+                    ref={(el) => {
+                      videoRefs.current[i] = el;
+                    }}
+                    className="project-reel-video"
+                    src={assetUrl(item.src)}
+                    poster={item.poster ? assetUrl(item.poster) : undefined}
+                    playsInline
+                    loop
+                    muted
+                    preload="metadata"
+                    controls={false}
+                    disablePictureInPicture
+                    tabIndex={-1}
+                  />
+                  <button
+                    type="button"
+                    className="project-reel-play is-visible"
+                    onClick={() => setModalIndex(i)}
+                    aria-label={`Reproducir ${playbackTitle}`}
+                  >
+                    <span className="project-reel-play-icon" aria-hidden="true">
+                      <span className="project-reel-play-ring" aria-hidden="true" />
+                      <Play size={28} strokeWidth={2} fill="currentColor" />
+                    </span>
+                  </button>
+                </>
               ) : item.kind === "image" ? (
                 <img
                   className="project-reel-video"
@@ -208,6 +329,16 @@ export default function VerticalVideoCarousel({
             />
           ))}
         </div>
+      )}
+
+      {carouselModalOpen && modalItem?.kind === "video" && (
+        <VideoPlayerModal
+          open
+          src={modalItem.src}
+          poster={modalItem.poster}
+          title={playbackTitle}
+          onClose={() => setModalIndex(null)}
+        />
       )}
     </section>
   );

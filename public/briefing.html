@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>winup. — Pendiente de vuestra parte</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --bg-soft: #111;
+      --fg: #fff;
+      --muted: rgba(255,255,255,.65);
+      --accent: #c8ff00;
+      --accent-dim: rgba(200,255,0,.12);
+      --line: rgba(255,255,255,.1);
+      --radius: 12px;
+      --max: 640px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 2rem 1.25rem 6rem;
+    }
+    .brand { font-weight: 700; font-size: 1rem; margin-bottom: 2rem; }
+    .brand span { color: var(--accent); }
+
+    .hero {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero h1 {
+      font-size: clamp(1.5rem, 5vw, 1.85rem);
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+    .hero p { color: var(--muted); font-size: 0.95rem; }
+    .hero .highlight {
+      display: block;
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      background: var(--accent-dim);
+      border: 1px solid rgba(200,255,0,.25);
+      border-radius: var(--radius);
+      color: var(--fg);
+      font-size: 0.88rem;
+    }
+
+    .progress-wrap { margin-bottom: 2rem; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--line);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    section { margin-bottom: 2rem; }
+    section h2 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .item {
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .item-head {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .item-num {
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background: var(--line);
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.1rem;
+    }
+    .item.done .item-num { background: var(--accent); color: #000; }
+    .item-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.15rem; }
+    .item-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
+
+    .opts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.7rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .opt:has(input:checked) {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .opt input { accent-color: var(--accent); }
+
+    .extra {
+      margin-top: 0.65rem;
+      display: none;
+    }
+    .extra.show { display: block; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="url"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--fg);
+      font: inherit;
+      font-size: 0.88rem;
+      padding: 0.55rem 0.7rem;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: rgba(200,255,0,.4);
+    }
+    textarea { min-height: 64px; resize: vertical; }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    @media (max-width: 480px) { .row-2 { grid-template-columns: 1fr; } }
+
+    label.field-label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .field { margin-bottom: 0.65rem; }
+    .field:last-child { margin-bottom: 0; }
+
+    .svc-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .svc-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.85rem;
+    }
+    .svc-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .svc-row select {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--fg);
+      font: inherit;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.5rem;
+      max-width: 11rem;
+    }
+
+    .sticky-submit {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(5,5,5,.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--line);
+      padding: 0.85rem 1.25rem;
+    }
+    .sticky-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .sticky-inner p { font-size: 0.78rem; color: var(--muted); flex: 1; min-width: 180px; }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.7rem 1.25rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { opacity: 0.92; }
+    .btn-primary:disabled { opacity: 0.5; cursor: wait; }
+
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--accent);
+      color: #000;
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.3s;
+      z-index: 50;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    details { margin-top: 0.5rem; }
+    details summary {
+      font-size: 0.78rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    details summary:hover { color: var(--fg); }
+    details[open] summary { color: var(--accent); margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="brand">winup<span>.</span></p>
+
+    <div class="hero">
+      <h1>La web está hecha.<br/>Esto es lo que falta de vuestra parte.</h1>
+      <p>De nuestro lado el desarrollo está cerrado. Para entregar el proyecto y publicar, necesitamos que completéis este checklist.</p>
+      <span class="highlight">⏱ Son 5 minutos. Marcad cada punto y pulsad Enviar — nos llega automáticamente.</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Progreso</span>
+        <span id="progressText">0 / 8</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <form id="form">
+
+      <!-- 0. Quién -->
+      <section>
+        <h2>Vuestras datos</h2>
+        <div class="item" data-track="contact">
+          <div class="row-2">
+            <div class="field">
+              <label class="field-label" for="nombre">Nombre</label>
+              <input type="text" id="nombre" name="nombre" required placeholder="Quién rellena esto" />
+            </div>
+            <div class="field">
+              <label class="field-label" for="email">Email o teléfono</label>
+              <input type="text" id="email" name="email" required placeholder="Para contactaros" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. Textos servicios -->
+      <section>
+        <h2>1 · Textos de servicios</h2>
+        <div class="item" data-track="textos">
+          <div class="item-head">
+            <span class="item-num">1</span>
+            <div style="flex:1">
+              <p class="item-title">Los textos de las 7 páginas de servicio</p>
+              <p class="item-desc">Ya están escritos en la web (borrador). ¿Qué hacemos?</p>
+              <div class="opts" data-extra-trigger="textos">
+                <label class="opt"><input type="radio" name="textos" value="ok" required /> Me valen — publicad así</label>
+                <label class="opt"><input type="radio" name="textos" value="cambios" /> Quiero cambiar algo</label>
+                <label class="opt"><input type="radio" name="textos" value="reunion" /> Lo vemos en una call</label>
+              </div>
+              <div class="extra" id="extra-textos">
+                <div class="field" style="margin-top:0.65rem">
+                  <label class="field-label" for="textosNotas">¿Qué cambiar? (casos ficticios, FAQs, frases…)</label>
+                  <textarea id="textosNotas" name="textosNotas" placeholder="Ej.: cambiar el caso del restaurante por uno real, corregir FAQ de publicidad…"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Material visual servicios -->
+      <section>
+        <h2>2 · Fotos y vídeos de servicios</h2>
+        <div class="item" data-track="material">
+          <div class="item-head">
+            <span class="item-num">2</span>
+            <div style="flex:1">
+              <p class="item-title">Carruseles y vídeos por servicio</p>
+              <p class="item-desc">Marcad el estado de cada uno. Los archivos van en una carpeta (Drive/WeTransfer) — abajo ponéis el enlace.</p>
+              <div class="svc-grid" id="svcGrid"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Métricas -->
+      <section>
+        <h2>3 · Números de Publicidad y SEO</h2>
+        <div class="item" data-track="metricas">
+          <div class="item-head">
+            <span class="item-num">3</span>
+            <div style="flex:1">
+              <p class="item-title">Métricas en la web (€1,2M+, +300k leads, +2,4k keywords…)</p>
+              <div class="opts" data-extra-trigger="metricas">
+                <label class="opt"><input type="radio" name="metricas" value="ok" required /> Correctos</label>
+                <label class="opt"><input type="radio" name="metricas" value="corregir" /> Hay que corregir</label>
+                <label class="opt"><input type="radio" name="metricas" value="quitar" /> Quitadlos por ahora</label>
+              </div>
+              <div class="extra" id="extra-metricas">
+                <div class="field" style="margin-top:0.65rem">
+                  <textarea name="metricasNotas" placeholder="Indicad los números reales…"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Equipo -->
+      <section>
+        <h2>4 · Equipo (Quiénes somos)</h2>
+        <div class="item" data-track="equipo">
+          <div class="item-head">
+            <span class="item-num">4</span>
+            <div style="flex:1">
+              <p class="item-title">Nombres, roles y fotos del equipo</p>
+              <div class="opts" data-extra-trigger="equipo">
+                <label class="opt"><input type="radio" name="equipo" value="enviado" required /> Lo subo a la carpeta</label>
+                <label class="opt"><input type="radio" name="equipo" value="fecha" /> Lo envío antes del…</label>
+                <label class="opt"><input type="radio" name="equipo" value="placeholder" /> Dejad placeholders por ahora</label>
+              </div>
+              <div class="extra" id="extra-equipo-fecha">
+                <div class="field" style="margin-top:0.65rem">
+                  <input type="date" name="equipoFecha" />
+                </div>
+              </div>
+              <div class="extra" id="extra-equipo-notas">
+                <div class="field" style="margin-top:0.65rem">
+                  <textarea name="equipoNotas" placeholder="Nombre · Rol · Bio (una línea por persona)&#10;Ej.: Ana García · Dirección · Estrategia y cierre de proyectos"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Legal -->
+      <section>
+        <h2>5 · Legal (aviso legal, privacidad, cookies)</h2>
+        <div class="item" data-track="legal">
+          <div class="item-head">
+            <span class="item-num">5</span>
+            <div style="flex:1">
+              <p class="item-title">Textos legales de la web</p>
+              <div class="opts" data-extra-trigger="legal">
+                <label class="opt"><input type="radio" name="legal" value="tenemos" required /> Tenemos textos — los subimos</label>
+                <label class="opt"><input type="radio" name="legal" value="plantilla" /> Usad plantilla con nuestros datos</label>
+                <label class="opt"><input type="radio" name="legal" value="abogado" /> Lo pasa nuestro abogado</label>
+              </div>
+              <div class="extra" id="extra-legal">
+                <div class="field" style="margin-top:0.65rem">
+                  <label class="field-label">Datos de la empresa (razón social, CIF, domicilio, email, dominio web)</label>
+                  <textarea name="legalDatos" placeholder="Razón social:&#10;CIF:&#10;Domicilio:&#10;Email:&#10;Web:"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Edición -->
+      <section>
+        <h2>6 · Cómo editaréis la web después</h2>
+        <div class="item" data-track="edicion">
+          <div class="item-head">
+            <span class="item-num">6</span>
+            <div style="flex:1">
+              <p class="item-title">Una sola decisión — ¿cómo queréis mantener el contenido?</p>
+              <div class="field" style="margin-top:0.5rem">
+                <select name="edicion" required style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg);font:inherit;padding:0.55rem 0.7rem">
+                  <option value="">— Elegid una opción —</option>
+                  <option value="a">A · Nos escribís y lo cambiamos nosotros</option>
+                  <option value="b">B · Panel visual (Sanity, Contentful…)</option>
+                  <option value="c">C · Notion</option>
+                  <option value="d">D · WordPress / Webflow</option>
+                  <option value="e">E · GitHub + formación</option>
+                  <option value="f">F · Panel admin a medida</option>
+                  <option value="nsnc">Aún no lo sé</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Carpeta -->
+      <section>
+        <h2>7 · Carpeta con archivos</h2>
+        <div class="item" data-track="carpeta">
+          <div class="item-head">
+            <span class="item-num">7</span>
+            <div style="flex:1">
+              <p class="item-title">Enlace a Drive / Dropbox / WeTransfer</p>
+              <p class="item-desc">Fotos, vídeos, PDFs legales, fotos del equipo… todo en una carpeta.</p>
+              <div class="opts" data-extra-trigger="carpeta" style="margin-bottom:0.65rem">
+                <label class="opt"><input type="radio" name="carpeta" value="lista" required /> Ya está lista</label>
+                <label class="opt"><input type="radio" name="carpeta" value="fecha" /> La subo antes del…</label>
+                <label class="opt"><input type="radio" name="carpeta" value="vacio" /> Aún no tengo nada</label>
+              </div>
+              <div class="field">
+                <input type="url" name="carpetaEnlace" placeholder="https://drive.google.com/… (cuando la tengáis)" />
+              </div>
+              <div class="extra" id="extra-carpeta-fecha">
+                <div class="field" style="margin-top:0.5rem">
+                  <input type="date" name="carpetaFecha" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. Compromiso -->
+      <section>
+        <h2>8 · Compromiso</h2>
+        <div class="item" data-track="compromiso">
+          <div class="item-head">
+            <span class="item-num">8</span>
+            <div style="flex:1">
+              <p class="item-title">¿Cuándo tendremos todo lo pendiente?</p>
+              <div class="field" style="margin-top:0.5rem">
+                <input type="date" name="fechaCompromiso" required />
+              </div>
+              <div class="field" style="margin-top:0.65rem">
+                <label class="field-label">Algo más que debamos saber (opcional)</label>
+                <textarea name="notas" placeholder="Cualquier cosa…"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </form>
+  </div>
+
+  <div class="sticky-submit">
+    <div class="sticky-inner">
+      <p>Al enviar recibimos vuestras respuestas al instante.</p>
+      <button type="submit" form="form" class="btn btn-primary" id="submitBtn">Enviar ✓</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE = "winup-pendiente-v2";
+    const SERVICES = [
+      { slug: "redes-sociales", label: "Redes Sociales", needs: "fotos/vídeos" },
+      { slug: "contenido", label: "Contenido", needs: "fotos/vídeos" },
+      { slug: "eventos", label: "Eventos", needs: "diagrama" },
+      { slug: "influencers", label: "Influencers", needs: "fotos/vídeos" },
+      { slug: "web", label: "Web", needs: "capturas" },
+      { slug: "publicidad", label: "Publicidad", needs: "opcional" },
+      { slug: "seo", label: "SEO", needs: "opcional" },
+    ];
+
+    const TRACK_KEYS = ["contact", "textos", "material", "metricas", "equipo", "legal", "edicion", "carpeta", "compromiso"];
+    const TOTAL = 8; // contact doesn't count in progress display same way - actually 8 numbered items
+
+    // Build service grid
+    const grid = document.getElementById("svcGrid");
+    SERVICES.forEach((s) => {
+      const row = document.createElement("div");
+      row.className = "svc-row";
+      row.innerHTML = `
+        <span>${s.label} <span style="color:var(--muted);font-size:0.75rem">(${s.needs})</span></span>
+        <select name="svc_${s.slug}" required>
+          <option value="">—</option>
+          <option value="listo">✓ En la carpeta</option>
+          <option value="fecha">Lo envío pronto</option>
+          <option value="vacio">Dejadlo vacío</option>
+          <option value="na">No aplica</option>
+        </select>
+      `;
+      grid.appendChild(row);
+    });
+
+    // Show/hide extras
+    function bindExtra(radioName, showWhen, extraId) {
+      document.querySelectorAll(`input[name="${radioName}"]`).forEach((r) => {
+        r.addEventListener("change", () => {
+          const el = document.getElementById(extraId);
+          if (el) el.classList.toggle("show", showWhen.includes(r.value));
+          updateProgress();
+        });
+      });
+    }
+
+    bindExtra("textos", ["cambios", "reunion"], "extra-textos");
+    bindExtra("metricas", ["corregir"], "extra-metricas");
+    bindExtra("legal", ["plantilla", "tenemos"], "extra-legal");
+
+    document.querySelectorAll('input[name="equipo"]').forEach((r) => {
+      r.addEventListener("change", () => {
+        document.getElementById("extra-equipo-fecha").classList.toggle("show", r.value === "fecha");
+        document.getElementById("extra-equipo-notas").classList.toggle("show", r.value === "enviado" || r.value === "fecha");
+        updateProgress();
+      });
+    });
+
+    document.querySelectorAll('input[name="carpeta"]').forEach((r) => {
+      r.addEventListener("change", () => {
+        document.getElementById("extra-carpeta-fecha").classList.toggle("show", r.value === "fecha");
+        updateProgress();
+      });
+    });
+
+    function isFilled(name, type = "radio") {
+      if (type === "radio") return !!document.querySelector(`input[name="${name}"]:checked`);
+      if (type === "select") {
+        const el = document.querySelector(`[name="${name}"]`);
+        return el && el.value.trim() !== "";
+      }
+      if (type === "contact") {
+        return document.getElementById("nombre").value.trim() && document.getElementById("email").value.trim();
+      }
+      if (type === "material") {
+        return SERVICES.every((s) => document.querySelector(`[name="svc_${s.slug}"]`)?.value);
+      }
+      if (type === "date") {
+        const el = document.querySelector(`[name="${name}"]`);
+        return el && el.value;
+      }
+      return false;
+    }
+
+    function updateProgress() {
+      let done = 0;
+      const checks = [
+        () => isFilled("contact", "contact"),
+        () => isFilled("textos"),
+        () => isFilled("material", "material"),
+        () => isFilled("metricas"),
+        () => isFilled("equipo"),
+        () => isFilled("legal"),
+        () => isFilled("edicion", "select"),
+        () => isFilled("carpeta") && (document.querySelector('input[name="carpeta"]:checked')?.value !== "lista" || document.querySelector('[name="carpetaEnlace"]')?.value.trim() || document.querySelector('input[name="carpeta"]:checked')?.value === "vacio" || document.querySelector('input[name="carpeta"]:checked')?.value === "fecha"),
+        () => isFilled("fechaCompromiso", "date"),
+      ];
+
+      // Simpler: 8 main items
+      const items = [
+        { track: "contact", ok: isFilled("contact", "contact") },
+        { track: "textos", ok: isFilled("textos") },
+        { track: "material", ok: isFilled("material", "material") },
+        { track: "metricas", ok: isFilled("metricas") },
+        { track: "equipo", ok: isFilled("equipo") },
+        { track: "legal", ok: isFilled("legal") },
+        { track: "edicion", ok: isFilled("edicion", "select") },
+        { track: "carpeta", ok: isFilled("carpeta") },
+        { track: "compromiso", ok: isFilled("fechaCompromiso", "date") },
+      ];
+
+      items.forEach(({ track, ok }) => {
+        const el = document.querySelector(`[data-track="${track}"]`);
+        if (el) el.classList.toggle("done", ok);
+        if (ok && track !== "contact") done++;
+      });
+
+      const pct = Math.round((done / TOTAL) * 100);
+      document.getElementById("progressFill").style.width = pct + "%";
+      document.getElementById("progressText").textContent = `${done} / ${TOTAL}`;
+    }
+
+    function collect() {
+      const form = document.getElementById("form");
+      const fd = new FormData(form);
+      const raw = Object.fromEntries(fd.entries());
+
+      const servicios = {};
+      SERVICES.forEach((s) => {
+        servicios[s.slug] = { label: s.label, estado: raw[`svc_${s.slug}`] || "" };
+      });
+
+      return {
+        meta: {
+          formVersion: "2.0",
+          enviadoEl: new Date().toISOString(),
+          nombre: raw.nombre || "",
+          contacto: raw.email || "",
+        },
+        textosServicios: {
+          decision: raw.textos || "",
+          notas: raw.textosNotas || "",
+        },
+        materialServicios: servicios,
+        metricas: {
+          decision: raw.metricas || "",
+          correcciones: raw.metricasNotas || "",
+        },
+        equipo: {
+          decision: raw.equipo || "",
+          fecha: raw.equipoFecha || "",
+          personas: raw.equipoNotas || "",
+        },
+        legal: {
+          decision: raw.legal || "",
+          datosEmpresa: raw.legalDatos || "",
+        },
+        edicionWeb: raw.edicion || "",
+        carpeta: {
+          decision: raw.carpeta || "",
+          enlace: raw.carpetaEnlace || "",
+          fecha: raw.carpetaFecha || "",
+        },
+        compromiso: {
+          fecha: raw.fechaCompromiso || "",
+          notas: raw.notas || "",
+        },
+      };
+    }
+
+    function apply(data) {
+      if (!data) return;
+      const set = (name, val) => {
+        const els = document.querySelectorAll(`[name="${name}"]`);
+        if (!els.length || val == null || val === "") return;
+        const e = els[0];
+        if (e.type === "radio") els.forEach((r) => { r.checked = r.value === val; r.dispatchEvent(new Event("change")); });
+        else e.value = val;
+      };
+
+      if (data.meta) {
+        set("nombre", data.meta.nombre);
+        set("email", data.meta.contacto);
+      }
+      if (data.textosServicios) {
+        set("textos", data.textosServicios.decision);
+        set("textosNotas", data.textosServicios.notas);
+      }
+      if (data.materialServicios) {
+        Object.entries(data.materialServicios).forEach(([slug, v]) => set(`svc_${slug}`, v.estado));
+      }
+      if (data.metricas) {
+        set("metricas", data.metricas.decision);
+        set("metricasNotas", data.metricas.correcciones);
+      }
+      if (data.equipo) {
+        set("equipo", data.equipo.decision);
+        set("equipoFecha", data.equipo.fecha);
+        set("equipoNotas", data.equipo.personas);
+      }
+      if (data.legal) {
+        set("legal", data.legal.decision);
+        set("legalDatos", data.legal.datosEmpresa);
+      }
+      set("edicion", data.edicionWeb);
+      if (data.carpeta) {
+        set("carpeta", data.carpeta.decision);
+        set("carpetaEnlace", data.carpeta.enlace);
+        set("carpetaFecha", data.carpeta.fecha);
+      }
+      if (data.compromiso) {
+        set("fechaCompromiso", data.compromiso.fecha);
+        set("notas", data.compromiso.notas);
+      }
+      updateProgress();
+    }
+
+    function save() {
+      const d = collect();
+      d.meta.enviadoEl = undefined;
+      localStorage.setItem(STORAGE, JSON.stringify(d));
+    }
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3000);
+    }
+
+    // Restore
+    try {
+      const saved = localStorage.getItem(STORAGE);
+      if (saved) apply(JSON.parse(saved));
+    } catch (_) {}
+
+    document.getElementById("form").addEventListener("input", () => { save(); updateProgress(); });
+    document.getElementById("form").addEventListener("change", () => { save(); updateProgress(); });
+
+    document.getElementById("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (window.location.protocol === "file:") {
+        toast("Abrid esta página desde la web, no como archivo local");
+        return;
+      }
+
+      const data = collect();
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.textContent = "Enviando…";
+
+      try {
+        const res = await fetch("/api/briefing", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+
+        if (!res.ok || !result.ok) {
+          throw new Error(result.error || "Error al enviar");
+        }
+
+        localStorage.removeItem(STORAGE);
+
+        if (result.emailed) {
+          toast("Enviado ✓ — gracias");
+        } else {
+          toast("Recibido ✓ — gracias");
+        }
+
+        btn.textContent = "Enviado ✓";
+      } catch (err) {
+        console.error(err);
+        toast("Error al enviar — probad de nuevo");
+        btn.disabled = false;
+        btn.textContent = "Enviar ✓";
+      }
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>

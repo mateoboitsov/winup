@@ -9,6 +9,19 @@ export type FAQ = {
   a: string;
 };
 
+export type ServiceMetric = {
+  label: string;
+  value: string;
+  detail?: string;
+};
+
+export type ServiceShowcaseItem = {
+  kind: "image" | "video";
+  src: string;
+  caption?: string;
+  poster?: string;
+};
+
 export type Service = {
   slug: string;
   title: string;
@@ -22,6 +35,18 @@ export type Service = {
   statement: string;
   /** Título creativo de la sección de casos. */
   casesTitle?: string;
+  /** Título opcional para bloque de métricas. */
+  metricsTitle?: string;
+  /** Métricas destacadas del servicio. */
+  metrics?: ServiceMetric[];
+  /** Etiqueta para carrusel visual del servicio. */
+  showcaseLabel?: string;
+  /** Elementos del carrusel visual. */
+  showcaseItems?: ServiceShowcaseItem[];
+  /** Título del bloque de diagrama. */
+  diagramLabel?: string;
+  /** Ruta del diagrama cuando esté cargado. */
+  diagramSrc?: string;
   /** Título del CTA final, específico al servicio. */
   ctaTitle?: string;
   items?: string[];
@@ -36,7 +61,7 @@ export const SERVICES: Service[] = [
     heroTitle: "Tu marca con voz propia en redes, sin que tengas que estar pendiente.",
     label: "¿Por qué nosotros?",
     eyebrow: "Gestión y comunidad",
-    casesTitle: "Nuestras redes sociales las encuentras en cada scroll.",
+    showcaseLabel: "Carrusel de redes sociales",
     ctaTitle: "Cuéntanos tu marca y te decimos qué haríamos con ella.",
     statement:
       "No subcontratamos, no usamos plantillas y no publicamos por publicar. Cada cuenta que gestionamos tiene una estrategia detrás, un tono propio y una persona real que entiende tu negocio.",
@@ -45,6 +70,7 @@ export const SERVICES: Service[] = [
       "Creatividad que enamora",
       "Crecimiento orgánico y engagement",
     ],
+    showcaseItems: [],
     cases: [
       {
         client: "Restaurante local",
@@ -95,7 +121,7 @@ export const SERVICES: Service[] = [
     heroTitle: "El contenido que hace que la gente se detenga, mire y compre.",
     label: "¿Por qué nosotros?",
     eyebrow: "Foto, video y storytelling",
-    casesTitle: "Nuestro contenido lo encuentras en pantallas, no en carpetas.",
+    showcaseLabel: "Carrusel de contenido",
     ctaTitle: "Dinos qué quieres contar y organizamos la sesión.",
     statement:
       "El contenido que funciona no es el más bonito, es el más honesto. Llevamos la cámara, el criterio y la dirección: tú solo tienes que ser tú mismo.",
@@ -104,6 +130,7 @@ export const SERVICES: Service[] = [
       "Contenido estratégico para cada plataforma",
       "Storytelling que conecta con tu audiencia",
     ],
+    showcaseItems: [],
     cases: [
       {
         client: "Estudio de arquitectura",
@@ -149,6 +176,7 @@ export const SERVICES: Service[] = [
     heroTitle: "El evento que organizas hoy puede seguir generando impacto semanas después.",
     label: "¿Por qué nosotros?",
     eyebrow: "Presencia que se recuerda",
+    diagramLabel: "Diagrama",
     casesTitle: "Nuestros eventos los sigues viviendo semanas después.",
     ctaTitle: "Cuéntanos tu próximo evento y te decimos cómo lo haríamos.",
     statement:
@@ -194,10 +222,11 @@ export const SERVICES: Service[] = [
     heroTitle: "Influencers que mueven a tu audiencia a comprar, no solo a mirar.",
     label: "¿Por qué nosotros?",
     eyebrow: "Alcance con criterio",
-    casesTitle: "Nuestras colaboraciones las encuentras en el carrito, no solo en el feed.",
+    showcaseLabel: "Carrusel de influencers",
     ctaTitle: "Dinos tu producto y te proponemos los perfiles ideales.",
     statement:
       "Los seguidores no pagan facturas, las conversiones sí. Buscamos perfiles que encajan de verdad con tu marca, negociamos condiciones justas y medimos cada colaboración con datos reales.",
+    showcaseItems: [],
     cases: [
       {
         client: "Marca de alimentación saludable",
@@ -238,62 +267,12 @@ export const SERVICES: Service[] = [
     ],
   },
   {
-    slug: "publicidad",
-    title: "Publicidad",
-    heroTitle: "Anuncios que generan clientes, no solo impresiones.",
-    label: "¿Por qué nosotros?",
-    eyebrow: "Inversión con resultados",
-    casesTitle: "Nuestra publicidad la encuentras en los números, no en las excusas.",
-    ctaTitle: "Cuéntanos tu objetivo y analizamos si podemos ayudarte.",
-    statement:
-      "No lanzamos campañas y rezamos. Testeamos, optimizamos y escalamos solo lo que funciona. Tu presupuesto se trata como si fuera nuestro.",
-    items: ["Meta Ads (Facebook & Instagram)", "Google Ads"],
-    cases: [
-      {
-        client: "Academia de formación online",
-        result: "CPA reducido un 62% en 6 semanas",
-        desc: "Reestructuramos la cuenta, limpiamos audiencias y centramos el presupuesto en lo que ya convertía.",
-      },
-      {
-        client: "Inmobiliaria local",
-        result: "47 leads cualificados en el primer mes",
-        desc: "Campaña de Google Ads con landing específica. Sin fugas, sin ruido, solo gente con intención real de compra.",
-      },
-    ],
-    faqs: [
-      {
-        q: "¿Cuál es el presupuesto mínimo recomendado?",
-        a: "Para Meta Ads, desde 500€/mes en inversión publicitaria. Para Google Ads, desde 800€/mes. Por debajo es difícil obtener datos suficientes para optimizar.",
-      },
-      {
-        q: "¿Los resultados son garantizados?",
-        a: "Ninguna agencia honesta garantiza resultados específicos. Lo que garantizamos es gestión transparente, optimización continua y datos claros.",
-      },
-      {
-        q: "¿Puedo pausar las campañas cuando quiera?",
-        a: "Sí, en cualquier momento. El presupuesto publicitario es tuyo y tú decides cuándo activarlo o pausarlo.",
-      },
-      {
-        q: "¿Vosotros también creáis los anuncios o solo los gestionáis?",
-        a: "Nos encargamos de todo: copy, creatividades, segmentación, lanzamiento y optimización. Tú solo revisas y apruebas.",
-      },
-      {
-        q: "¿Qué diferencia hay entre Meta Ads y Google Ads?",
-        a: "Meta Ads llega a personas que aún no te buscan pero encajan con tu público. Google Ads captura a quien ya tiene intención de compra. Lo ideal es combinar ambos.",
-      },
-      {
-        q: "¿Con qué frecuencia reportáis los resultados?",
-        a: "Enviamos un informe mensual con métricas clave y explicamos qué hemos cambiado y por qué. Sin tecnicismos innecesarios.",
-      },
-    ],
-  },
-  {
     slug: "web",
     title: "Web",
     heroTitle: "Una web diseñada para que quien entra, actúe.",
     label: "¿Por qué nosotros?",
     eyebrow: "Diseño y desarrollo",
-    casesTitle: "Nuestras webs las encuentras en los primeros resultados y en los informes de ventas.",
+    showcaseLabel: "Carrusel de web",
     ctaTitle: "Cuéntanos tu negocio y te enseñamos cómo sería tu nueva web.",
     statement:
       "Diseñamos para que el usuario compre, contacte o vuelva, no para ganar premios de diseño. Cada decisión visual tiene un argumento de negocio detrás.",
@@ -302,6 +281,7 @@ export const SERVICES: Service[] = [
       "Adaptado a todos los dispositivos",
       "Optimizado para SEO",
     ],
+    showcaseItems: [],
     cases: [
       {
         client: "Consultoría de RRHH",
@@ -342,16 +322,110 @@ export const SERVICES: Service[] = [
     ],
   },
   {
+    slug: "publicidad",
+    title: "Publicidad",
+    heroTitle: "Anuncios que generan clientes, no solo impresiones.",
+    label: "¿Por qué nosotros?",
+    eyebrow: "Inversión con resultados",
+    metricsTitle: "Resultados acumulados en publicidad",
+    ctaTitle: "Cuéntanos tu objetivo y analizamos si podemos ayudarte.",
+    statement:
+      "No lanzamos campañas y rezamos. Testeamos, optimizamos y escalamos solo lo que funciona. Tu presupuesto se trata como si fuera nuestro.",
+    items: ["Meta Ads (Facebook & Instagram)", "Google Ads"],
+    metrics: [
+      {
+        label: "Inversión gestionada",
+        value: "€1,2M+",
+        detail: "en Meta Ads y Google Ads con todos nuestros clientes.",
+      },
+      {
+        label: "Leads generados",
+        value: "+300 mil",
+        detail: "contactos cualificados captados en campañas de conversión.",
+      },
+      {
+        label: "Campañas lanzadas",
+        value: "+320",
+        detail: "entre awareness, tráfico y ventas en sectores muy distintos.",
+      },
+      {
+        label: "ROAS medio global",
+        value: "x3,1",
+        detail: "de retorno acumulado en cuentas con seguimiento de conversiones.",
+      },
+    ],
+    cases: [
+      {
+        client: "Academia de formación online",
+        result: "CPA reducido un 62% en 6 semanas",
+        desc: "Reestructuramos la cuenta, limpiamos audiencias y centramos el presupuesto en lo que ya convertía.",
+      },
+      {
+        client: "Inmobiliaria local",
+        result: "47 leads cualificados en el primer mes",
+        desc: "Campaña de Google Ads con landing específica. Sin fugas, sin ruido, solo gente con intención real de compra.",
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Cuál es el presupuesto mínimo recomendado?",
+        a: "Para Meta Ads, desde 500€/mes en inversión publicitaria. Para Google Ads, desde 800€/mes. Por debajo es difícil obtener datos suficientes para optimizar.",
+      },
+      {
+        q: "¿Los resultados son garantizados?",
+        a: "Ninguna agencia honesta garantiza resultados específicos. Lo que garantizamos es gestión transparente, optimización continua y datos claros.",
+      },
+      {
+        q: "¿Puedo pausar las campañas cuando quiera?",
+        a: "Sí, en cualquier momento. El presupuesto publicitario es tuyo y tú decides cuándo activarlo o pausarlo.",
+      },
+      {
+        q: "¿Vosotros también creáis los anuncios o solo los gestionáis?",
+        a: "Nos encargamos de todo: copy, creatividades, segmentación, lanzamiento y optimización. Tú solo revisas y apruebas.",
+      },
+      {
+        q: "¿Qué diferencia hay entre Meta Ads y Google Ads?",
+        a: "Meta Ads llega a personas que aún no te buscan pero encajan con tu público. Google Ads captura a quien ya tiene intención de compra. Lo ideal es combinar ambos.",
+      },
+      {
+        q: "¿Con qué frecuencia reportáis los resultados?",
+        a: "Enviamos un informe mensual con métricas clave y explicamos qué hemos cambiado y por qué. Sin tecnicismos innecesarios.",
+      },
+    ],
+  },
+  {
     slug: "seo",
     title: "SEO",
     heroTitle: "Cuando alguien busca lo que vendes, queremos que te encuentre a ti primero.",
     label: "¿Por qué nosotros?",
     eyebrow: "Ser encontrado",
-    casesTitle: "Nuestro SEO lo encuentras en Google, no en informes de PowerPoint.",
+    metricsTitle: "Resultados acumulados en SEO",
     ctaTitle: "Dinos tu web y analizamos gratis por qué Google no te muestra.",
     statement:
       "El SEO barato te puede hundir en Google durante meses. Trabajamos con estrategia a largo plazo, contenido que responde preguntas reales y técnica limpia que los motores de búsqueda premian.",
     items: ["Optimización de contenido", "Estrategia de palabras clave"],
+    metrics: [
+      {
+        label: "Keywords en Top 10",
+        value: "+2,4 mil",
+        detail: "posicionadas en Google con todos nuestros clientes.",
+      },
+      {
+        label: "Visitas orgánicas",
+        value: "+15M",
+        detail: "generadas en webs que gestionamos con estrategia SEO.",
+      },
+      {
+        label: "Webs optimizadas",
+        value: "+90",
+        detail: "con auditoría técnica, contenido y seguimiento continuo.",
+      },
+      {
+        label: "Páginas publicadas",
+        value: "+1.800",
+        detail: "optimizadas para captar búsquedas de intención real.",
+      },
+    ],
     cases: [
       {
         client: "Clínica veterinaria",

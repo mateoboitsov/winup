@@ -39,6 +39,75 @@ const PARAMS = {
   viewMorphDuration: 0.95,
 };
 
+const MOBILE_MAX_WIDTH = 720;
+const CAMERA_FOV = 46;
+const CARD_W = 3.6;
+const GRID_SPAN = PARAMS.cols * (CARD_W + PARAMS.colGap) - PARAMS.colGap;
+
+type ViewportTuning = {
+  spiralCamZ: number;
+  gridCamZ: number;
+  spiralFogNear: number;
+  spiralFogFar: number;
+  gridFogNear: number;
+  gridFogFar: number;
+};
+
+function getViewportTuning(width: number, height: number): ViewportTuning {
+  if (width > MOBILE_MAX_WIDTH) {
+    return {
+      spiralCamZ: PARAMS.spiralCamZ,
+      gridCamZ: PARAMS.gridCamZ,
+      spiralFogNear: PARAMS.spiralFogNear,
+      spiralFogFar: PARAMS.spiralFogFar,
+      gridFogNear: PARAMS.gridFogNear,
+      gridFogFar: PARAMS.gridFogFar,
+    };
+  }
+
+  const aspect = width / height;
+  const tanHalf = Math.tan(((CAMERA_FOV * Math.PI) / 180) / 2);
+
+  function fitCamZ(baseZ: number, contentSpan: number, targetFill: number) {
+    const viewW = 2 * baseZ * tanHalf * aspect;
+    const fill = contentSpan / viewW;
+    if (fill <= targetFill) return baseZ;
+    return (contentSpan / targetFill) / (2 * tanHalf * aspect);
+  }
+
+  const spiralBaseDist = PARAMS.spiralCamZ - PARAMS.radius;
+  const spiralViewW = 2 * spiralBaseDist * tanHalf * aspect;
+  const spiralFill = CARD_W / spiralViewW;
+  const spiralTargetFill = 0.62;
+  const spiralCamZ =
+    spiralFill <= spiralTargetFill
+      ? PARAMS.spiralCamZ
+      : (CARD_W / spiralTargetFill) / (2 * tanHalf * aspect) + PARAMS.radius;
+
+  const gridCamZ = fitCamZ(PARAMS.gridCamZ, GRID_SPAN, 0.92);
+  const spiralScale = spiralCamZ / PARAMS.spiralCamZ;
+  const gridScale = gridCamZ / PARAMS.gridCamZ;
+
+  return {
+    spiralCamZ,
+    gridCamZ,
+    spiralFogNear: PARAMS.spiralFogNear * spiralScale,
+    spiralFogFar: PARAMS.spiralFogFar * spiralScale,
+    gridFogNear: PARAMS.gridFogNear * gridScale,
+    gridFogFar: PARAMS.gridFogFar * gridScale,
+  };
+}
+
+function camZFor(mode: GalleryView, viewport: ViewportTuning) {
+  return mode === "spiral" ? viewport.spiralCamZ : viewport.gridCamZ;
+}
+
+function fogFor(mode: GalleryView, viewport: ViewportTuning) {
+  return mode === "spiral"
+    ? { near: viewport.spiralFogNear, far: viewport.spiralFogFar }
+    : { near: viewport.gridFogNear, far: viewport.gridFogFar };
+}
+
 export default function Spiral() {
   const router = useRouter();
   const routerRef = useRef(router);
@@ -82,18 +151,14 @@ export default function Spiral() {
     const width = container.clientWidth;
     const height = container.clientHeight;
     const initialMode = viewModeRef.current;
+    let viewport = getViewportTuning(width, height);
 
     const scene = new THREE.Scene();
-    const fogNear = initialMode === "spiral" ? PARAMS.spiralFogNear : PARAMS.gridFogNear;
-    const fogFar = initialMode === "spiral" ? PARAMS.spiralFogFar : PARAMS.gridFogFar;
-    scene.fog = new THREE.Fog(0x1a1a1a, fogNear, fogFar);
+    const initialFog = fogFor(initialMode, viewport);
+    scene.fog = new THREE.Fog(0x1a1a1a, initialFog.near, initialFog.far);
 
-    const camera = new THREE.PerspectiveCamera(46, width / height, 0.1, 1000);
-    camera.position.set(
-      0,
-      0,
-      initialMode === "spiral" ? PARAMS.spiralCamZ : PARAMS.gridCamZ
-    );
+    const camera = new THREE.PerspectiveCamera(CAMERA_FOV, width / height, 0.1, 1000);
+    camera.position.set(0, 0, camZFor(initialMode, viewport));
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -505,7 +570,7 @@ export default function Spiral() {
         if (mesh.userData.virtIdx !== virtIdx) {
           mesh.userData.virtIdx = virtIdx;
           const dataIdx = ((virtIdx % len) + len) % len;
-          mesh.userData.data = PROJECTS_DATA[dataIdx];
+          mesh.userData.data = PROJECTS_DATA[dataIdx]!;
           const mat = mesh.material as THREE.MeshBasicMaterial;
           const ready = textureReady[dataIdx];
           mat.map = cachedTextures[dataIdx];
@@ -596,11 +661,7 @@ export default function Spiral() {
       };
 
       const camPos = camera.position.clone();
-      const camEnd = new THREE.Vector3(
-        0,
-        0,
-        mode === "spiral" ? PARAMS.spiralCamZ : PARAMS.gridCamZ
-      );
+      const camEnd = new THREE.Vector3(0, 0, camZFor(mode, viewport));
 
       const depthFor = (pos: THREE.Vector3, virtIdx: number, layout: GalleryView, cam: THREE.Vector3) => {
         if (layout === "spiral") return pos.distanceTo(cam);
@@ -644,9 +705,8 @@ export default function Spiral() {
       morphCards.sort((a, b) => a.camDist - b.camDist || a.travel - b.travel);
 
       const fog = scene.fog as THREE.Fog;
-      const camZ = mode === "spiral" ? PARAMS.spiralCamZ : PARAMS.gridCamZ;
-      const near = mode === "spiral" ? PARAMS.spiralFogNear : PARAMS.gridFogNear;
-      const far = mode === "spiral" ? PARAMS.spiralFogFar : PARAMS.gridFogFar;
+      const camZ = camZFor(mode, viewport);
+      const { near, far } = fogFor(mode, viewport);
       const d = PARAMS.viewMorphDuration;
       const ease = "power3.inOut";
       const maxStagger = 0.35;
@@ -857,9 +917,8 @@ export default function Spiral() {
       transition.viewMode = saved.viewMode;
       setViewMode(saved.viewMode);
       setCardCurvature(saved.viewMode === "spiral" ? 1 : 0);
-      const camZ = saved.viewMode === "spiral" ? PARAMS.spiralCamZ : PARAMS.gridCamZ;
-      const near = saved.viewMode === "spiral" ? PARAMS.spiralFogNear : PARAMS.gridFogNear;
-      const far = saved.viewMode === "spiral" ? PARAMS.spiralFogFar : PARAMS.gridFogFar;
+      const camZ = camZFor(saved.viewMode, viewport);
+      const { near, far } = fogFor(saved.viewMode, viewport);
       camera.position.z = camZ;
       (scene.fog as THREE.Fog).near = near;
       (scene.fog as THREE.Fog).far = far;
@@ -1146,8 +1205,9 @@ export default function Spiral() {
             ease: "power2.out",
             overwrite: true,
           });
+          const hoverData = currentHoveredMesh.userData.data as Project | null;
           gsap.to(currentHoveredMesh.userData.limeMat, {
-            opacity: PARAMS.limeHover,
+            opacity: hoverData?.featured ? 0 : PARAMS.limeHover,
             duration: 0.4,
             ease: "power2.out",
             overwrite: true,
@@ -1167,7 +1227,14 @@ export default function Spiral() {
       renderer.render(scene, camera);
     };
 
-    layoutCards(0, initialMode);
+    const featuredIndex = PROJECTS_DATA.findIndex((p) => p.featured);
+    const initialScroll = featuredIndex >= 0 ? featuredIndex : 0;
+    if (!transition.active) {
+      stateRef.current.scrollPos = initialScroll;
+      stateRef.current.targetScroll = initialScroll;
+    }
+
+    layoutCards(transition.active ? transition.scroll : initialScroll, initialMode);
 
     function playSpiralIntro() {
       // Entrada: desde abajo + giro rápido inicial, luego se asienta al centro.
@@ -1268,9 +1335,19 @@ export default function Spiral() {
     const handleResize = () => {
       const w = container.clientWidth;
       const h = container.clientHeight;
+      viewport = getViewportTuning(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+
+      if (!transitioningRef.current && !viewMorphing) {
+        const mode = viewModeRef.current;
+        camera.position.z = camZFor(mode, viewport);
+        const fog = scene.fog as THREE.Fog;
+        const { near, far } = fogFor(mode, viewport);
+        fog.near = near;
+        fog.far = far;
+      }
     };
     window.addEventListener("resize", handleResize);
 
@@ -1390,7 +1467,7 @@ export default function Spiral() {
       ref={pageRef}
       data-page="spiral"
       className="spiral-ui"
-      style={{ position: "relative", width: "100vw", height: "100vh", background: "var(--bg-soft)", overflow: "hidden", zIndex: 35 }}
+      style={{ position: "relative", width: "100vw", height: "100dvh", background: "var(--bg-soft)", overflow: "hidden", zIndex: 35 }}
     >
       {reverseBg && (
         <img
