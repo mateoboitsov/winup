@@ -286,23 +286,6 @@
 
     <form id="form">
 
-      <!-- 0. Quién -->
-      <section>
-        <h2>Vuestras datos</h2>
-        <div class="item" data-track="contact">
-          <div class="row-2">
-            <div class="field">
-              <label class="field-label" for="nombre">Nombre</label>
-              <input type="text" id="nombre" name="nombre" required placeholder="Quién rellena esto" />
-            </div>
-            <div class="field">
-              <label class="field-label" for="email">Email o teléfono</label>
-              <input type="text" id="email" name="email" required placeholder="Para contactaros" />
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- 1. Textos servicios -->
       <section>
         <h2>1 · Textos de servicios</h2>
@@ -328,14 +311,14 @@
         </div>
       </section>
 
-      <!-- 2. Material visual servicios -->
+      <!-- 2. Contenido servicios -->
       <section>
-        <h2>2 · Fotos y vídeos de servicios</h2>
+        <h2>2 · Contenido de servicios</h2>
         <div class="item" data-track="material">
           <div class="item-head">
             <span class="item-num">2</span>
             <div style="flex:1">
-              <p class="item-title">Carruseles y vídeos por servicio</p>
+              <p class="item-title">Textos, fotos, vídeos y material por servicio</p>
               <p class="item-desc">Marcad el estado de cada uno. Los archivos van en una carpeta (Drive/WeTransfer) — abajo ponéis el enlace.</p>
               <div class="svc-grid" id="svcGrid"></div>
             </div>
@@ -429,12 +412,10 @@
               <div class="field" style="margin-top:0.5rem">
                 <select name="edicion" required style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg);font:inherit;padding:0.55rem 0.7rem">
                   <option value="">— Elegid una opción —</option>
-                  <option value="a">A · Nos escribís y lo cambiamos nosotros</option>
-                  <option value="b">B · Panel visual (Sanity, Contentful…)</option>
-                  <option value="c">C · Notion</option>
-                  <option value="d">D · WordPress / Webflow</option>
-                  <option value="e">E · GitHub + formación</option>
-                  <option value="f">F · Panel admin a medida</option>
+                  <option value="a">Nos escribís y lo cambiamos nosotros</option>
+                  <option value="b">Panel visual (Sanity, Contentful…)</option>
+                  <option value="e">GitHub + formación</option>
+                  <option value="f">Panel admin a medida</option>
                   <option value="nsnc">Aún no lo sé</option>
                 </select>
               </div>
@@ -478,8 +459,10 @@
             <span class="item-num">8</span>
             <div style="flex:1">
               <p class="item-title">¿Cuándo tendremos todo lo pendiente?</p>
-              <div class="field" style="margin-top:0.5rem">
-                <input type="date" name="fechaCompromiso" required />
+              <div class="opts" style="margin-top:0.5rem">
+                <label class="opt"><input type="radio" name="fechaCompromiso" value="2026-08-20" required /> 20 de agosto</label>
+                <label class="opt"><input type="radio" name="fechaCompromiso" value="2026-08-21" /> 21 de agosto</label>
+                <label class="opt"><input type="radio" name="fechaCompromiso" value="2026-08-22" /> 22 de agosto</label>
               </div>
               <div class="field" style="margin-top:0.65rem">
                 <label class="field-label">Algo más que debamos saber (opcional)</label>
@@ -503,7 +486,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE = "winup-pendiente-v2";
+    const STORAGE = "winup-pendiente-v3";
     const SERVICES = [
       { slug: "redes-sociales", label: "Redes Sociales", needs: "fotos/vídeos" },
       { slug: "contenido", label: "Contenido", needs: "fotos/vídeos" },
@@ -514,8 +497,7 @@
       { slug: "seo", label: "SEO", needs: "opcional" },
     ];
 
-    const TRACK_KEYS = ["contact", "textos", "material", "metricas", "equipo", "legal", "edicion", "carpeta", "compromiso"];
-    const TOTAL = 8; // contact doesn't count in progress display same way - actually 8 numbered items
+    const TOTAL = 8;
 
     // Build service grid
     const grid = document.getElementById("svcGrid");
@@ -571,36 +553,16 @@
         const el = document.querySelector(`[name="${name}"]`);
         return el && el.value.trim() !== "";
       }
-      if (type === "contact") {
-        return document.getElementById("nombre").value.trim() && document.getElementById("email").value.trim();
-      }
       if (type === "material") {
         return SERVICES.every((s) => document.querySelector(`[name="svc_${s.slug}"]`)?.value);
-      }
-      if (type === "date") {
-        const el = document.querySelector(`[name="${name}"]`);
-        return el && el.value;
       }
       return false;
     }
 
     function updateProgress() {
       let done = 0;
-      const checks = [
-        () => isFilled("contact", "contact"),
-        () => isFilled("textos"),
-        () => isFilled("material", "material"),
-        () => isFilled("metricas"),
-        () => isFilled("equipo"),
-        () => isFilled("legal"),
-        () => isFilled("edicion", "select"),
-        () => isFilled("carpeta") && (document.querySelector('input[name="carpeta"]:checked')?.value !== "lista" || document.querySelector('[name="carpetaEnlace"]')?.value.trim() || document.querySelector('input[name="carpeta"]:checked')?.value === "vacio" || document.querySelector('input[name="carpeta"]:checked')?.value === "fecha"),
-        () => isFilled("fechaCompromiso", "date"),
-      ];
 
-      // Simpler: 8 main items
       const items = [
-        { track: "contact", ok: isFilled("contact", "contact") },
         { track: "textos", ok: isFilled("textos") },
         { track: "material", ok: isFilled("material", "material") },
         { track: "metricas", ok: isFilled("metricas") },
@@ -608,13 +570,13 @@
         { track: "legal", ok: isFilled("legal") },
         { track: "edicion", ok: isFilled("edicion", "select") },
         { track: "carpeta", ok: isFilled("carpeta") },
-        { track: "compromiso", ok: isFilled("fechaCompromiso", "date") },
+        { track: "compromiso", ok: isFilled("fechaCompromiso") },
       ];
 
       items.forEach(({ track, ok }) => {
         const el = document.querySelector(`[data-track="${track}"]`);
         if (el) el.classList.toggle("done", ok);
-        if (ok && track !== "contact") done++;
+        if (ok) done++;
       });
 
       const pct = Math.round((done / TOTAL) * 100);
@@ -634,10 +596,8 @@
 
       return {
         meta: {
-          formVersion: "2.0",
+          formVersion: "2.1",
           enviadoEl: new Date().toISOString(),
-          nombre: raw.nombre || "",
-          contacto: raw.email || "",
         },
         textosServicios: {
           decision: raw.textos || "",
@@ -680,10 +640,6 @@
         else e.value = val;
       };
 
-      if (data.meta) {
-        set("nombre", data.meta.nombre);
-        set("email", data.meta.contacto);
-      }
       if (data.textosServicios) {
         set("textos", data.textosServicios.decision);
         set("textosNotas", data.textosServicios.notas);

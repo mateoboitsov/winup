@@ -5,8 +5,8 @@ export type BriefingPayload = {
   meta: {
     formVersion?: string;
     enviadoEl?: string;
-    nombre: string;
-    contacto: string;
+    nombre?: string;
+    contacto?: string;
   };
   textosServicios?: { decision: string; notas?: string };
   materialServicios?: Record<string, { label: string; estado: string }>;
@@ -87,8 +87,6 @@ export function briefingToPlainText(payload: BriefingPayload) {
     "Briefing winup. — pendiente cliente",
     "================================",
     "",
-    `Nombre: ${payload.meta.nombre}`,
-    `Contacto: ${payload.meta.contacto}`,
     `Recibido: ${payload.meta.enviadoEl ?? new Date().toISOString()}`,
     "",
     "TEXTOS SERVICIOS",
@@ -168,7 +166,7 @@ export async function sendBriefingEmail(payload: BriefingPayload) {
   const date = (payload.meta.enviadoEl ?? new Date().toISOString()).slice(0, 10);
   const filename = `winup-pendiente-${date}.json`;
   const json = JSON.stringify(payload, null, 2);
-  const subject = `winup briefing — ${payload.meta.nombre || "cliente"} (${date})`;
+  const subject = `winup briefing — ${date}${payload.compromiso?.fecha ? ` · entrega ${payload.compromiso.fecha}` : ""}`;
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",

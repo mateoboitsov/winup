@@ -7,14 +7,9 @@ import {
 
 function isValidPayload(body: unknown): body is BriefingPayload {
   if (!body || typeof body !== "object") return false;
-  const meta = (body as BriefingPayload).meta;
-  return (
-    !!meta &&
-    typeof meta.nombre === "string" &&
-    meta.nombre.trim().length > 0 &&
-    typeof meta.contacto === "string" &&
-    meta.contacto.trim().length > 0
-  );
+  const b = body as BriefingPayload;
+  const fecha = b.compromiso?.fecha?.trim();
+  return !!fecha;
 }
 
 export async function POST(req: Request) {
@@ -23,7 +18,7 @@ export async function POST(req: Request) {
 
     if (!isValidPayload(body)) {
       return NextResponse.json(
-        { ok: false, error: "Faltan nombre y contacto." },
+        { ok: false, error: "Falta indicar la fecha de compromiso." },
         { status: 400 },
       );
     }
