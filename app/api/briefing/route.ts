@@ -42,13 +42,16 @@ export async function POST(req: Request) {
 
     if (!mail.sent) {
       if (mail.reason === "missing_config") {
-        return NextResponse.json({
-          ok: true,
-          saved: true,
-          emailed: false,
-          warning:
-            "Guardado en servidor. Falta RESEND_API_KEY (copiar de maibo-course-app).",
-        });
+        return NextResponse.json(
+          {
+            ok: false,
+            saved: true,
+            emailed: false,
+            error:
+              "El formulario está recibido pero falta configurar el email en el servidor.",
+          },
+          { status: 503 },
+        );
       }
 
       return NextResponse.json(

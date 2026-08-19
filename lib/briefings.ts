@@ -28,19 +28,29 @@ export async function saveBriefing(payload: BriefingPayload) {
     ...payload,
   };
 
-  await fs.mkdir(BRIEFINGS_DIR, { recursive: true });
-
-  let existing: unknown[] = [];
-  try {
-    const raw = await fs.readFile(BRIEFINGS_FILE, "utf8");
-    existing = JSON.parse(raw) as unknown[];
-    if (!Array.isArray(existing)) existing = [];
-  } catch {
-    existing = [];
+  // Netlify/serverless: filesystem de solo lectura — el email es la fuente de verdad.
+  if (process.env.NETLIFY || process.env.VERCEL) {
+    return entry;
   }
 
-  existing.push(entry);
-  await fs.writeFile(BRIEFINGS_FILE, JSON.stringify(existing, null, 2), "utf8");
+  try {
+    await fs.mkdir(BRIEFINGS_DIR, { recursive: true });
+
+    let existing: unknown[] = [];
+    try {
+      const raw = await fs.readFile(BRIEFINGS_FILE, "utf8");
+      existing = JSON.parse(raw) as unknown[];
+      if (!Array.isArray(existing)) existing = [];
+    } catch {
+      existing = [];
+    }
+
+    existing.push(entry);
+    await fs.writeFile(BRIEFINGS_FILE, JSON.stringify(existing, null, 2), "utf8");
+  } catch (err) {
+    console.warn("[briefing] No se pudo guardar en disco", err);
+  }
+
   return entry;
 }
 
