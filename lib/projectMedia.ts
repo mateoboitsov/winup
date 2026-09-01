@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, type Dirent } from "node:fs";
 import path from "node:path";
 import type { Project, ProjectGallery, ProjectVideo } from "@/lib/projects";
 
@@ -38,11 +38,38 @@ function readProjectGalleries(projectId: number, dir: string): ProjectGallery[] 
   return galleries.length > 0 ? galleries : undefined;
 }
 
-/** Lee public/media/{id} y rellena galería y vídeos con lo que haya en disco. */
+function readVideos(
+  projectId: number,
+  dir: string,
+  files: Dirent[],
+  pattern: RegExp
+): ProjectVideo[] {
+  return files
+    .filter((entry) => entry.isFile() && pattern.test(entry.name))
+    .map((entry) => entry.name)
+    .sort((a, b) => numericName(a) - numericName(b))
+    .map((file) => {
+      const num = numericName(file);
+      const numberedPoster = `${String(num).padStart(2, "0")}.jpg`;
+      const posterPath = path.join(dir, numberedPoster);
+      const coverPath = path.join(dir, "cover.jpg");
+
+      return {
+        src: `/media/${projectId}/${file}`,
+        poster: existsSync(posterPath)
+          ? `/media/${projectId}/${numberedPoster}`
+          : existsSync(coverPath)
+            ? `/media/${projectId}/cover.jpg`
+            : undefined,
+      };
+    });
+}
+
+/** Lee public/media/{id} y rellena galería, vídeos y reels con lo que haya en disco. */
 export function attachProjectMedia(project: Project): Project {
   const dir = mediaDir(project.id);
   if (!existsSync(dir)) {
-    return { ...project, images: [], videos: undefined };
+    return { ...project, images: [], videos: undefined, reels: undefined };
   }
 
   const galleries = readProjectGalleries(project.id, dir);
@@ -53,25 +80,8 @@ export function attachProjectMedia(project: Project): Project {
     .sort((a, b) => numericName(a) - numericName(b))
     .map((file) => `/media/${project.id}/${file}`);
 
-  const videos: ProjectVideo[] = files
-    .filter((entry) => entry.isFile() && /^video-\d+\.mp4$/i.test(entry.name))
-    .map((entry) => entry.name)
-    .sort((a, b) => numericName(a) - numericName(b))
-    .map((file) => {
-      const num = numericName(file);
-      const numberedPoster = `${String(num).padStart(2, "0")}.jpg`;
-      const posterPath = path.join(dir, numberedPoster);
-      const coverPath = path.join(dir, "cover.jpg");
-
-      return {
-        src: `/media/${project.id}/${file}`,
-        poster: existsSync(posterPath)
-          ? `/media/${project.id}/${numberedPoster}`
-          : existsSync(coverPath)
-            ? `/media/${project.id}/cover.jpg`
-            : undefined,
-      };
-    });
+  const videos = readVideos(project.id, dir, files, /^video-\d+\.mp4$/i);
+  const reels = readVideos(project.id, dir, files, /^reel-\d+\.mp4$/i);
 
   return {
     ...project,
@@ -79,5 +89,6 @@ export function attachProjectMedia(project: Project): Project {
     images: galleries ? galleries.flatMap((gallery) => gallery.images) : images,
     galleries,
     videos: videos.length > 0 ? videos : undefined,
+    reels: reels.length > 0 ? reels : undefined,
   };
 }

@@ -190,9 +190,10 @@ export default function ProjectDetail({ project }: { project: Project }) {
     : gallerySlotsOf(
         usePhotoCarousel ? project.images.slice(imageSplitAt) : project.images
       );
-  const reelItems = reelItemsOf(project.videos);
+  const videoItems = reelItemsOf(project.videos);
+  const reelItems = reelItemsOf(project.reels);
   const heroVideoSrc =
-    videoOnly && reelItems[0]?.kind === "video" ? reelItems[0].src : null;
+    videoOnly && videoItems[0]?.kind === "video" ? videoItems[0].src : null;
 
   const goToNextProject = () => {
     const img = previewRef.current;
@@ -525,11 +526,41 @@ export default function ProjectDetail({ project }: { project: Project }) {
 
           <ProjectHighlightBlock sections={sections} />
 
+          {project.reelIntro && reelItems.length > 0 && (
+            <section className="project-reel-intro" aria-label="Reels">
+              <div className="content-width">
+                <p className="project-reel-intro-body">{project.reelIntro}</p>
+              </div>
+            </section>
+          )}
+
           <VerticalVideoCarousel
-            items={reelItems}
+            items={videoItems}
             label="Vídeos"
             modalTitle={project.title}
           />
+
+          <VerticalVideoCarousel
+            items={reelItems}
+            label="Reels"
+            modalTitle={project.title}
+          />
+
+          {project.previewUrl && (
+            <section className="project-preview" aria-label="Vista previa">
+              <div className="content-width">
+                <p className="ui-label" style={{ color: "var(--accent)", marginBottom: "1rem" }}>
+                  Vista previa
+                </p>
+                <iframe
+                  className="project-preview-frame"
+                  src={assetUrl(project.previewUrl)}
+                  title={`Vista previa — ${project.title}`}
+                  loading="lazy"
+                />
+              </div>
+            </section>
+          )}
 
           <GalleryBlock slots={restGallery} />
 

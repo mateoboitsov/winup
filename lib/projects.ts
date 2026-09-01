@@ -35,6 +35,12 @@ export type Project = {
   sections?: ProjectSection[];
   /** Vídeos (9:16) para el carrusel. */
   videos?: ProjectVideo[];
+  /** Reels (9:16), sección aparte de los vídeos. Archivos: reel-NN.mp4 */
+  reels?: ProjectVideo[];
+  /** Texto introductorio encima del carrusel de reels. */
+  reelIntro?: string;
+  /** Vista previa embebida (p. ej. HTML interactivo). */
+  previewUrl?: string;
   /** Entregables / alcance del proyecto. */
   deliverables?: string[];
   /** Resumen corto al cierre de la ficha (opcional; si no hay, usa entregables). */
@@ -170,19 +176,13 @@ export const PROJECTS_DATA: Project[] = [
   project({
     id: 5,
     title: "La Disquera",
-    category: "Fotografía",
+    category: "Evento",
     year: "2025",
     client: "La Disquera",
-    label: "Fotografía",
+    label: "Evento",
     statement:
-      "Retrato de La Disquera: vinilos, espacio y cultura musical en una lectura visual limpia. Queríamos que se notara el oficio y el ambiente sin sobrecargar la imagen.\n\nLa sesión combina detalle de producto y planos que explican el local. Ideal para comunicación de marca y para quien descubre el espacio por primera vez en redes.\n\nMenos pose, más presencia: la fotografía deja hablar al sitio.",
-    deliverables: ["Retrato de espacio", "Detalle de producto", "Piezas RRSS"],
-    sections: [
-      {
-        title: "Cultura en el encuadre",
-        body: "Composiciones sobrias que ponen el foco en lo esencial: el disco, la luz y el carácter del local.",
-      },
-    ],
+      "Un evento no se cubre solo el día que ocurre. Se prepara antes y se sigue contando después.\n\nCon La Disquera trabajamos las tres fases: la pre-campaña que genera expectación, la campaña que empuja hasta la fecha y la cobertura completa durante el evento. Fotografía y vídeo, sin perder de vista el ambiente y la cultura musical que hay detrás.\n\nMaterial para publicar en caliente y para seguir usando semanas después.",
+    deliverables: ["Pre-campaña", "Campaña", "Cobertura de evento", "Reels"],
   }),
   project({
     id: 6,
@@ -247,14 +247,10 @@ export const PROJECTS_DATA: Project[] = [
     client: "La Laguna Sound",
     label: "Evento",
     statement:
-      "La Laguna Sound pide directo, público y un aftertaste que se pueda compartir al día siguiente. Documentamos el concierto con stills y piezas verticales pensadas para Instagram.\n\nEl relato es el de una noche que se vive en sala y se alarga en el móvil: energía, escenario y esa sensación de haber estado ahí.\n\nEditamos para el scroll sin perder el pulso del concierto.",
-    deliverables: ["Cobertura de concierto", "Reels", "Stills RRSS"],
-    sections: [
-      {
-        title: "La noche en vertical",
-        body: "Dos piezas de recap y una secuencia de stills para que el evento siga trabajando cuando ya se han apagado las luces.",
-      },
-    ],
+      "Un festival no empieza el día que abre puertas. Empieza meses antes, cuando hay que convencer a alguien de que ese fin de semana merece la pena.\n\nCon La Laguna Sound acompañamos todo el camino: la expectativa previa, la campaña que llena el recinto y los tres días de festival cubiertos de principio a fin. Vídeo, fotografía, entrevistas y ese contenido que se sube mientras todavía suena la música.\n\nUn año de trabajo para que el público lo viva dos veces: allí y en el móvil.",
+    deliverables: ["Campaña previa", "Cobertura de festival", "Reels", "Entrevistas"],
+    reelIntro:
+      "Todo lo que pasó, contado en vertical: aftermovie, entrevistas y el día a día del festival.",
   }),
   project({
     id: 10,
@@ -262,16 +258,10 @@ export const PROJECTS_DATA: Project[] = [
     category: "Motion",
     year: "2025",
     client: "Bigup",
-    label: "Redes",
+    label: "Evento",
     statement:
-      "Piezas para Bigup: ritmo de feed, tipografía grande y una lectura inmediata. El trabajo está pensado para parar el scroll y dejar marca, no para explicar de más.\n\nCada still funciona solo y en secuencia. Misma dirección, distintos encuadres, pensados para stories y grid.\n\nMenos ruido, más presencia.",
-    deliverables: ["Stills para redes", "Dirección visual", "Piezas de campaña"],
-    sections: [
-      {
-        title: "Hecho para el feed",
-        body: "Composiciones de alto contraste, listas para publicar: el formato manda y el mensaje llega en un golpe de vista.",
-      },
-    ],
+      "Bigup es el escenario de los que aún no llenan estadios. Y esa es justo la historia que contamos.\n\nDirección visual y piezas de campaña con una idea clara: que cada cartel funcione como una presentación. Nombres que el público todavía no conoce, tratados con la misma fuerza que un cabeza de cartel.\n\nY el día del evento, allí: fotografía y vídeo para que el directo también viva en el feed.\n\nMenos ruido, más presencia.",
+    deliverables: ["Dirección visual", "Piezas de campaña", "Cobertura de evento", "Reels"],
   }),
   project({
     id: 11,
@@ -327,19 +317,13 @@ export const PROJECTS_DATA: Project[] = [
   project({
     id: 14,
     title: "FASRM",
-    category: "Fotografía",
+    category: "FASRM",
     year: "2025",
     client: "FASRM",
-    label: "Fotografía",
+    label: "Redes",
     statement:
-      "Cobertura para FASRM: reportaje y una pieza en movimiento. Documentamos el evento con plano corto y plano de ambiente, listo para comunicar con rapidez.\n\nLa fotografía sostiene el relato; el vídeo lo cierra. Mismo criterio, dos velocidades.\n\nMaterial útil el mismo día y con recorrido después.",
-    deliverables: ["Reportaje", "Vídeo recap", "Piezas RRSS"],
-    sections: [
-      {
-        title: "Documentar y publicar",
-        body: "Selección limpia, sin adorno de más: gente, gesto y contexto. Lo justo para que el evento se entienda.",
-      },
-    ],
+      "Con FASRM no vamos a un evento puntual: llevamos las redes durante todo el año.\n\nNos encargamos de la estrategia, el calendario y todo el contenido: fotografía, vídeo y las piezas que salen cada semana. Y cuando hay evento, estamos allí para cubrirlo entero.\n\nLa fotografía sostiene el relato; el vídeo lo cierra. Mismo criterio, dos velocidades.\n\nMaterial útil el mismo día y con recorrido después.",
+    deliverables: ["Estrategia RRSS", "Calendario editorial", "Fotografía", "Vídeo", "Diseño"],
   }),
   project({
     id: 15,
@@ -396,19 +380,15 @@ export const PROJECTS_DATA: Project[] = [
   project({
     id: 18,
     title: "Guía San Javier",
-    category: "Fotografía",
+    category: "Diseño",
     year: "2025",
     client: "San Javier",
     label: "Editorial",
+    heroFit: "contain",
     statement:
-      "Guía de San Javier: territorio, inmersión y una mirada editorial sobre el municipio. Fotografía para que el destino se desee, no solo se liste.\n\nLuz de costa, detalle y portada. Un set de imágenes para guía impresa y para digital.\n\nSan Javier, con criterio de publicación.",
-    deliverables: ["Fotografía editorial", "Portada", "Material de guía"],
-    sections: [
-      {
-        title: "Destino en páginas",
-        body: "Elegimos encuadres que funcionan en papel y en pantalla: aire, color y una lectura inmediata del lugar.",
-      },
-    ],
+      "Diseño editorial para la guía de 7 inmersiones de San Javier: territorio, costa y experiencias en un formato pensado para desear el destino, no solo listarlo.\n\nLa pieza une tipografía, color y composición en un sistema que funciona en papel y en pantalla.\n\nSan Javier, con criterio de publicación.",
+    deliverables: ["Diseño editorial", "Guía de inmersiones", "Sistema gráfico"],
+    previewUrl: "/media/18/preview.html",
   }),
   project({
     id: 19,
@@ -467,7 +447,6 @@ export const PROJECTS_DATA: Project[] = [
     category: "Fotografía",
     year: "2025",
     client: "winup.",
-    featured: true,
     label: "Fotografía",
     statement:
       "Fotografía de negocio para clínicas, restauración, deporte y producto. Un mismo oficio aplicado a marcas distintas: que se vea el trabajo real, con luz y con orden.\n\nDe la consulta al padel, del plato al equipo. Retrato corporativo y de espacio para web, ads y redes.\n\nEmpresas que se pueden enseñar.",

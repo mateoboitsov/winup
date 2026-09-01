@@ -756,6 +756,30 @@ a.soft-card-link {
   padding-top: clamp(2rem, 5vw, 3.5rem);
 }
 
+.project-reel-intro {
+  padding: clamp(2rem, 5vw, 3.5rem) clamp(1.5rem, 5vw, 4.5rem) 0;
+}
+
+.project-reel-intro-body {
+  max-width: 42rem;
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.project-preview {
+  padding: clamp(3rem, 8vw, 5rem) clamp(1.5rem, 5vw, 4.5rem);
+}
+
+.project-preview-frame {
+  display: block;
+  width: 100%;
+  min-height: min(80vh, 900px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: #faf9f5;
+}
+
 .project-reels-header,
 .project-photos-header {
   display: flex;
