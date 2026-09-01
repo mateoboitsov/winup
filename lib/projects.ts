@@ -41,6 +41,8 @@ export type Project = {
   reelIntro?: string;
   /** Vista previa embebida (p. ej. HTML interactivo). */
   previewUrl?: string;
+  /** Ficha con experiencia propia (sustituye el layout estándar). */
+  experience?: "guia-san-javier";
   /** Entregables / alcance del proyecto. */
   deliverables?: string[];
   /** Resumen corto al cierre de la ficha (opcional; si no hay, usa entregables). */
@@ -382,13 +384,17 @@ export const PROJECTS_DATA: Project[] = [
     title: "Guía San Javier",
     category: "Diseño",
     year: "2025",
-    client: "San Javier",
+    client: "Ayuntamiento de San Javier · Turismo",
     label: "Editorial",
-    heroFit: "contain",
+    experience: "guia-san-javier",
+    previewUrl: "/media/18/guia/Guia-San-Javier-proyecto.html",
     statement:
-      "Diseño editorial para la guía de 7 inmersiones de San Javier: territorio, costa y experiencias en un formato pensado para desear el destino, no solo listarlo.\n\nLa pieza une tipografía, color y composición en un sistema que funciona en papel y en pantalla.\n\nSan Javier, con criterio de publicación.",
-    deliverables: ["Diseño editorial", "Guía de inmersiones", "Sistema gráfico"],
-    previewUrl: "/media/18/preview.html",
+      "Diseño y edición de la Guía de Inmersiones de San Javier: 7 inmersiones, 65 páginas, hecha desde cero. Rejilla, tipografía, sistema de color, portadillas, tablas técnicas, iconografía, ilustraciones batimétricas y maquetación bilingüe español–inglés.\n\nTodo el material fotográfico y de vídeo es propio, capturado en Isla Grosa, El Farallón y La Laja.\n\nSan Javier, con criterio de publicación.",
+    deliverables: [
+      "Diseño editorial",
+      "Maquetación bilingüe",
+      "Edición e ilustración",
+    ],
   }),
   project({
     id: 19,

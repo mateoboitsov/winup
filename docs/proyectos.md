@@ -21,7 +21,7 @@ Base local: `http://localhost:3000` (cambia el dominio en producción).
 | 15 | [Forbes · Mainkore](http://localhost:3000/proyecto/15) | Motion | |
 | 16 | [Flexomed](http://localhost:3000/proyecto/16) | Motion | |
 | 17 | [Auditorio Víctor Villegas](http://localhost:3000/proyecto/17) | Fotografía | |
-| 18 | [Guía San Javier](http://localhost:3000/proyecto/18) | Diseño | HTML interactivo |
+| 18 | [Guía San Javier](http://localhost:3000/proyecto/18) | Diseño | Experiencia editorial interactiva |
 | 19 | [Laura Rayos](http://localhost:3000/proyecto/19) | Fotografía | |
 | 20 | [Saborea Águilas](http://localhost:3000/proyecto/20) | Motion | |
 | 21 | [San Jorge · Dragon Day](http://localhost:3000/proyecto/21) | Motion | |

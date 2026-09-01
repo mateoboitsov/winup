@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { type Service } from "@/lib/services";
 import ContactForm from "@/components/ContactForm";
 import VerticalVideoCarousel, { type ReelItem } from "@/components/VerticalVideoCarousel";
+import InfluencersShowcase from "@/components/InfluencersShowcase";
 
 gsap.registerPlugin(useGSAP);
 
@@ -146,8 +147,15 @@ export default function ServiceDetail({ service }: { service: Service }) {
       )}
 
       {/* ── Carrusel visual ──────────────────────────────────────────── */}
-      {service.showcaseLabel && (
-        showcaseItems.length > 0 ? (
+      {service.influencersShowcase ? (
+        <InfluencersShowcase
+          creators={service.influencersShowcase.creators}
+          stats={service.influencersShowcase.stats}
+          label={service.showcaseLabel}
+        />
+      ) : (
+        service.showcaseLabel &&
+        (showcaseItems.length > 0 ? (
           <VerticalVideoCarousel items={showcaseItems} label={service.showcaseLabel} />
         ) : (
           <section className="service-cases">
@@ -158,7 +166,7 @@ export default function ServiceDetail({ service }: { service: Service }) {
               </p>
             </div>
           </section>
-        )
+        ))
       )}
 
       {/* ── Diagrama ─────────────────────────────────────────────────── */}

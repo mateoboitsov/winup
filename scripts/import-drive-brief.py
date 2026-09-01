@@ -136,6 +136,25 @@ def import_all_reels() -> None:
             print(f"   {count} reel(s)", flush=True)
 
 
+def import_guia_san_javier() -> None:
+    zip_path = find_zip("interactiva", "proyecto")
+    dest_uploads = MEDIA / "18" / "uploads"
+    dest_uploads.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = unzip_to(zip_path, Path(tmp))
+        for src in sorted(folder.rglob("*")):
+            if not src.is_file() or src.suffix.lower() not in IMAGE_EXT | {".png"}:
+                continue
+            if "uploads" not in src.parts:
+                continue
+            base = src.stem
+            magick_jpeg(src, dest_uploads / f"{base}.jpg", GALLERY_SIZE)
+        hero = dest_uploads / "IMG_0115.jpg"
+        if hero.exists():
+            magick_jpeg(hero, MEDIA / "18" / "cover.jpg", COVER_SIZE, quality=82)
+    print("Guía San Javier: uploads + cover", flush=True)
+
+
 def main() -> None:
     if not DRIVE.is_dir():
         raise SystemExit(f"No existe {DRIVE}")
@@ -144,6 +163,7 @@ def main() -> None:
     import_all_reels()
     print(flush=True)
     import_fasrm_photos()
+    import_guia_san_javier()
     import_corporativas_cover()
     print("\nListo.", flush=True)
 

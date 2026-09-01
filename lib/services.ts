@@ -22,6 +22,22 @@ export type ServiceShowcaseItem = {
   poster?: string;
 };
 
+export type InfluencerCreator = {
+  handle: string;
+  followers: string;
+  avatar?: string;
+};
+
+export type InfluencerStat = {
+  value: string;
+  label: string;
+};
+
+export type InfluencersShowcaseData = {
+  creators: InfluencerCreator[];
+  stats: InfluencerStat[];
+};
+
 export type Service = {
   slug: string;
   title: string;
@@ -43,6 +59,8 @@ export type Service = {
   showcaseLabel?: string;
   /** Elementos del carrusel visual. */
   showcaseItems?: ServiceShowcaseItem[];
+  /** Bloque de creadores + métricas (solo influencers). */
+  influencersShowcase?: InfluencersShowcaseData;
   /** Título del bloque de diagrama. */
   diagramLabel?: string;
   /** Ruta del diagrama cuando esté cargado. */
@@ -70,7 +88,13 @@ export const SERVICES: Service[] = [
       "Creatividad que enamora",
       "Crecimiento orgánico y engagement",
     ],
-    showcaseItems: [],
+    showcaseItems: [
+      { kind: "video", src: "/media/10/reel-01.mp4", poster: "/media/10/cover.jpg" },
+      { kind: "video", src: "/media/9/reel-01.mp4", poster: "/media/9/cover.jpg" },
+      { kind: "video", src: "/media/10/reel-04.mp4" },
+      { kind: "image", src: "/media/10/01.jpg", caption: "Bigup" },
+      { kind: "image", src: "/media/9/01.jpg", caption: "La Laguna Sound" },
+    ],
     cases: [
       {
         client: "Restaurante local",
@@ -130,7 +154,13 @@ export const SERVICES: Service[] = [
       "Contenido estratégico para cada plataforma",
       "Storytelling que conecta con tu audiencia",
     ],
-    showcaseItems: [],
+    showcaseItems: [
+      { kind: "image", src: "/media/5/01.jpg", caption: "La Disquera" },
+      { kind: "image", src: "/media/14/fotografia/01.jpg", caption: "FASRM" },
+      { kind: "video", src: "/media/9/video-01.mp4", poster: "/media/9/cover.jpg" },
+      { kind: "image", src: "/media/4/01.jpg", caption: "Cañada Honda" },
+      { kind: "video", src: "/media/14/video-01.mp4", poster: "/media/14/cover.jpg" },
+    ],
     cases: [
       {
         client: "Estudio de arquitectura",
@@ -177,10 +207,17 @@ export const SERVICES: Service[] = [
     label: "¿Por qué nosotros?",
     eyebrow: "Presencia que se recuerda",
     diagramLabel: "Diagrama",
+    diagramSrc: "/media/servicios/eventos-proceso.svg",
     casesTitle: "Nuestros eventos los sigues viviendo semanas después.",
     ctaTitle: "Cuéntanos tu próximo evento y te decimos cómo lo haríamos.",
     statement:
       "Pensamos cada evento con la cámara en mente desde el primer momento. Lo que pasa en el espacio se convierte en contenido que trabaja mucho después de que apaguen las luces.",
+    showcaseItems: [
+      { kind: "video", src: "/media/2/reel-01.mp4", poster: "/media/2/cover.jpg" },
+      { kind: "video", src: "/media/9/reel-03.mp4" },
+      { kind: "video", src: "/media/5/reel-03.mp4", poster: "/media/5/cover.jpg" },
+      { kind: "video", src: "/media/21/video-01.mp4", poster: "/media/21/cover.jpg" },
+    ],
     cases: [
       {
         client: "Lanzamiento de producto tech",
@@ -222,11 +259,28 @@ export const SERVICES: Service[] = [
     heroTitle: "Influencers que mueven a tu audiencia a comprar, no solo a mirar.",
     label: "¿Por qué nosotros?",
     eyebrow: "Alcance con criterio",
-    showcaseLabel: "Carrusel de influencers",
+    showcaseLabel: "Red de creadores",
     ctaTitle: "Dinos tu producto y te proponemos los perfiles ideales.",
     statement:
       "Los seguidores no pagan facturas, las conversiones sí. Buscamos perfiles que encajan de verdad con tu marca, negociamos condiciones justas y medimos cada colaboración con datos reales.",
-    showcaseItems: [],
+    influencersShowcase: {
+      creators: [
+        { handle: "@mariaferjol", followers: "509K" },
+        { handle: "@miriamalegria", followers: "956K" },
+        { handle: "@laurimatheu", followers: "69,1K" },
+        { handle: "@yosoymario", followers: "144K" },
+        { handle: "@alexarama", followers: "84,8K" },
+        { handle: "@airamchacon", followers: "211K" },
+        { handle: "@luisbeltran", followers: "90K" },
+        { handle: "@carlabravo", followers: "312K" },
+      ],
+      stats: [
+        { value: "+180", label: "Creadores" },
+        { value: "+2.400", label: "Vídeos" },
+        { value: "96%", label: "Repiten" },
+        { value: "+120", label: "Marcas" },
+      ],
+    },
     cases: [
       {
         client: "Marca de alimentación saludable",
@@ -272,7 +326,6 @@ export const SERVICES: Service[] = [
     heroTitle: "Una web diseñada para que quien entra, actúe.",
     label: "¿Por qué nosotros?",
     eyebrow: "Diseño y desarrollo",
-    showcaseLabel: "Carrusel de web",
     ctaTitle: "Cuéntanos tu negocio y te enseñamos cómo sería tu nueva web.",
     statement:
       "Diseñamos para que el usuario compre, contacte o vuelva, no para ganar premios de diseño. Cada decisión visual tiene un argumento de negocio detrás.",
@@ -281,7 +334,6 @@ export const SERVICES: Service[] = [
       "Adaptado a todos los dispositivos",
       "Optimizado para SEO",
     ],
-    showcaseItems: [],
     cases: [
       {
         client: "Consultoría de RRHH",

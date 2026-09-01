@@ -45,9 +45,19 @@ export default function AboutPage() {
             <ul className="about-team-grid">
               {TEAM.map((member) => (
                 <li key={`${member.role}-${member.name}`} className="about-member">
-                  <div className="about-member-photo" aria-hidden />
+                  {member.photo ? (
+                    <img
+                      className="about-member-photo"
+                      src={member.photo}
+                      alt=""
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="about-member-photo is-placeholder" aria-hidden />
+                  )}
                   <h3 className="about-member-name">{member.name}</h3>
                   <p className="about-member-role">{member.role}</p>
+                  <p className="about-member-bio">{member.bio}</p>
                 </li>
               ))}
             </ul>

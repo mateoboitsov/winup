@@ -1,0 +1,77 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/media/equipo"
+public_folder: "/media/equipo"
+
+locale: "es"
+
+site_url: https://winup.netlify.app
+display_url: https://winup.netlify.app
+
+collections:
+  - name: "about"
+    label: "Quiénes somos"
+    files:
+      - name: "about"
+        label: "Historia y equipo"
+        file: "content/about.json"
+        fields:
+          - label: "Historia"
+            name: "story"
+            widget: "object"
+            fields:
+              - { label: "Etiqueta", name: "eyebrow", widget: "string" }
+              - { label: "Título", name: "title", widget: "string" }
+              - label: "Párrafos"
+                name: "paragraphs"
+                widget: "list"
+                field: { label: "Párrafo", name: "paragraph", widget: "text" }
+          - label: "Equipo"
+            name: "team"
+            widget: "list"
+            fields:
+              - { label: "Nombre", name: "name", widget: "string" }
+              - { label: "Cargo", name: "role", widget: "string" }
+              - { label: "Bio", name: "bio", widget: "text" }
+              - { label: "Foto", name: "photo", widget: "image", required: false }
+
+  - name: "legal"
+    label: "Legal"
+    files:
+      - name: "legal"
+        label: "Datos legales"
+        file: "content/legal.json"
+        fields:
+          - label: "Empresa"
+            name: "empresa"
+            widget: "object"
+            fields:
+              - { label: "Denominación", name: "denominacion", widget: "string" }
+              - { label: "NIF/CIF", name: "nif", widget: "string" }
+              - { label: "Domicilio", name: "domicilio", widget: "string" }
+              - { label: "Email", name: "email", widget: "string" }
+              - { label: "Teléfono", name: "telefono", widget: "string", required: false }
+              - { label: "Dominio", name: "dominio", widget: "string" }
+              - { label: "Responsable", name: "responsable", widget: "string" }
+              - {
+                  label: "Registro Mercantil (opcional)",
+                  name: "registroMercantil",
+                  widget: "string",
+                  required: false,
+                }
+              - { label: "Actividad / objeto social", name: "actividad", widget: "text" }
+              - {
+                  label: "Ciudad para jurisdicción (Juzgados y Tribunales de…)",
+                  name: "ciudadJurisdiccion",
+                  widget: "string",
+                }
+          - label: "Cookies"
+            name: "cookies"
+            widget: "object"
+            fields:
+              - { label: "Fecha de actualización", name: "fechaActualizacion", widget: "string" }
+              - { label: "¿Analítica?", name: "usaAnalitica", widget: "boolean", default: false }
+              - { label: "¿Marketing?", name: "usaMarketing", widget: "boolean", default: false }
+              - { label: "Herramienta analítica", name: "herramientaAnalitica", widget: "string", required: false }

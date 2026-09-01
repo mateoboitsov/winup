@@ -780,6 +780,154 @@ a.soft-card-link {
   background: #faf9f5;
 }
 
+.legal-content .legal-body {
+  max-width: 42rem;
+}
+
+.legal-section {
+  margin-top: 2rem;
+}
+
+.legal-section h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--accent);
+}
+
+.legal-section p,
+.legal-section ul {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.65;
+}
+
+.legal-section ul {
+  padding-left: 1.25rem;
+}
+
+.legal-section li + li {
+  margin-top: 0.45rem;
+}
+
+.legal-section p + p {
+  margin-top: 0.85rem;
+}
+
+.legal-content .soft-eyebrow::before {
+  display: none;
+}
+
+.legal-summary {
+  margin-top: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+}
+
+.legal-summary-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--accent);
+  letter-spacing: -0.04em;
+}
+
+.legal-summary ul {
+  padding-left: 1.25rem;
+}
+
+.legal-summary li {
+  margin-top: 0.45rem;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.55;
+  letter-spacing: -0.02em;
+}
+
+.legal-summary li:first-child {
+  margin-top: 0;
+}
+
+.legal-note {
+  margin-top: 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.legal-table-wrap {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.legal-table th,
+.legal-table td {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  text-align: left;
+  vertical-align: top;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.legal-table th {
+  color: var(--fg);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.legal-inline-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: rgba(200, 255, 0, 0.55);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    text-decoration-color 0.15s ease;
+}
+
+.legal-inline-link:hover {
+  color: var(--fg);
+  background: rgba(200, 255, 0, 0.14);
+  text-decoration-color: var(--accent);
+  opacity: 1;
+}
+
+.legal-inline-link:focus-visible {
+  outline: none;
+  color: var(--fg);
+  background: rgba(200, 255, 0, 0.14);
+  text-decoration-color: var(--accent);
+}
+
+.legal-paragraph + .legal-section {
+  margin-top: 1.5rem;
+}
+
+.about-member-photo.is-placeholder {
+  background: var(--bg-elevated);
+}
+
+.about-member-photo:not(.is-placeholder) {
+  object-fit: cover;
+}
+
+.about-member-bio {
+  margin-top: 0.65rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.68);
+}
+
 .project-reels-header,
 .project-photos-header {
   display: flex;
@@ -2186,6 +2334,160 @@ a.soft-card-link {
 .service-showcase-pending {
   color: rgba(255,255,255,0.6);
   font-size: 0.95rem;
+}
+
+.influencers-showcase {
+  --carousel-gutter: clamp(1.5rem, 5vw, 4.5rem);
+  --carousel-max: 1200px;
+  --carousel-inline-pad: calc(
+    var(--carousel-gutter) +
+      max(0px, (100vw - 2 * var(--carousel-gutter) - var(--carousel-max)) / 2)
+  );
+
+  background: var(--bg-soft);
+  padding-block: clamp(4rem, 10vw, 8rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.influencers-track-shell {
+  padding-inline: var(--carousel-gutter);
+  padding-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.influencers-track {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: clamp(0.35rem, 1.2vw, 1rem);
+  width: 100%;
+}
+
+.influencer-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: center;
+}
+
+.influencer-avatar-ring {
+  --story-gap: 2px;
+  --story-ring: 2px;
+  width: min(100%, 5.5rem);
+  aspect-ratio: 1;
+  height: auto;
+  padding: var(--story-ring);
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    #f9ce34 0%,
+    #ee2a7b 45%,
+    #6228d7 100%
+  );
+  box-sizing: border-box;
+}
+
+.influencer-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-soft);
+  border: var(--story-gap) solid var(--bg-soft);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.influencer-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.influencer-avatar-fallback {
+  font-size: clamp(0.85rem, 2.5vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.influencer-handle {
+  margin: 0;
+  width: 100%;
+  font-size: clamp(0.62rem, 1.1vw, 0.88rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.influencer-followers {
+  margin: 0;
+  font-size: clamp(0.58rem, 1vw, 0.82rem);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.influencers-metrics {
+  padding-inline: var(--carousel-gutter);
+}
+
+.influencers-metrics .service-metrics-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.5vw, 2.5rem);
+}
+
+.influencers-metrics .service-metric-card {
+  background: transparent;
+  border: none;
+  padding: 0;
+  gap: 0.85rem;
+}
+
+.influencers-metrics .service-metric-value {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+  color: #fff;
+}
+
+.influencers-metrics .service-metric-copy {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 22ch;
+}
+
+.influencers-metrics .service-metric-label {
+  font-size: inherit;
+  text-transform: none;
+  letter-spacing: inherit;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .influencers-metrics .service-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .influencers-metrics .service-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .influencers-metrics .service-metric-copy {
+    max-width: none;
+  }
 }
 
 .service-diagram {

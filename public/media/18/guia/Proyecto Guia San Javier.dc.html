@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0119.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0120.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0121.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0122.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0123.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0124.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0125.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0126.PNG" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0127.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0128.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0129.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0130.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0131.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0132.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0133.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0134.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0135.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0136.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0137.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0138.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0139.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0140.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0141.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0142.jpg" />
+<meta name="ext-resource-dependency" content="uploads/IMG_0115.jpg" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0A0A0A; }
+  * { box-sizing: border-box; }
+  a { color: #D6F400; text-decoration: none; }
+  a:hover { color: #FFFFFF; }
+  ::selection { background: #D6F400; color: #0A0A0A; }
+  @keyframes sj-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes sj-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+  .sj-strip::-webkit-scrollbar { height: 6px; }
+  .sj-strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); }
+</style>
+</helmet>
+
+<div style="background:#0A0A0A;color:#FFFFFF;font-family:Archivo,system-ui,sans-serif;overflow-x:hidden">
+
+  <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0A0A0A"></rect><text x="50" y="62" font-family="Archivo,sans-serif" font-size="34" font-weight="800" fill="#D6F400" text-anchor="middle">SJ</text></svg></template>
+  <div ref="{{ progressRef }}" style="position:fixed;top:0;left:0;height:3px;width:0%;background:#D6F400;z-index:60"></div>
+
+  <div style="position:relative;height:88vh;min-height:600px;width:100%;overflow:hidden">
+    <img ref="{{ heroRef }}" src="uploads/IMG_0115.jpg" alt="Presentación de la Guía de Inmersiones de San Javier" style="position:absolute;top:-8%;left:0;width:100%;height:116%;object-fit:cover;will-change:transform" />
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.86) 0%,rgba(10,10,10,.45) 38%,rgba(10,10,10,.72) 62%,rgba(10,10,10,.97) 100%)"></div>
+
+    <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:34px clamp(24px,6vw,120px) clamp(40px,6vh,72px)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap">
+        <a href="#proyectos" style="display:flex;align-items:center;gap:12px;color:#FFFFFF;font-size:17px;font-weight:500" style-hover="color:#D6F400">
+          <span style="font-size:19px;line-height:1">&#8592;</span>
+          <span>Volver a todos los proyectos</span>
+        </a>
+        <nav style="display:flex;gap:30px;font-size:17px;font-weight:500">
+          <a href="#inicio" style="color:#FFFFFF" style-hover="color:#D6F400">Inicio</a>
+          <a href="#servicios" style="color:#FFFFFF" style-hover="color:#D6F400">Servicios</a>
+          <a href="#proyectos" style="color:#D6F400">Proyectos</a>
+          <a href="#about" style="color:#FFFFFF" style-hover="color:#D6F400">About</a>
+          <a href="#contacto" style="color:#FFFFFF" style-hover="color:#D6F400">Contacto</a>
+        </nav>
+      </div>
+
+      <div>
+        <div style="color:#D6F400;font-size:19px;font-weight:500;margin-bottom:10px">Diseño · 2025</div>
+        <h1 style="margin:0;font-size:clamp(56px,10.5vw,190px);line-height:.86;font-weight:800;letter-spacing:-.035em;text-wrap:balance">Guía San Javier</h1>
+        <div style="margin-top:26px;display:flex;align-items:center;gap:14px;color:rgba(255,255,255,.7);font-size:17px;animation:sj-bob 2.6s ease-in-out infinite">
+          <span style="font-size:20px">&#8595;</span>
+          <span>65 páginas · 7 inmersiones · diseño y edición completa</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section style="border-bottom:1px solid rgba(255,255,255,.1);padding:clamp(40px,6vw,72px) clamp(24px,6vw,120px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px">
+      <div>
+        <div style="color:#D6F400;font-size:17px;font-weight:500;margin-bottom:14px">Cliente</div>
+        <div style="font-size:19px;color:rgba(255,255,255,.9)">Ayuntamiento de San Javier · Turismo</div>
+      </div>
+      <div>
+        <div style="color:#D6F400;font-size:17px;font-weight:500;margin-bottom:14px">Año</div>
+        <div style="font-size:19px;color:rgba(255,255,255,.9)">2025</div>
+      </div>
+      <div>
+        <div style="color:#D6F400;font-size:17px;font-weight:500;margin-bottom:14px">Categoría</div>
+        <div style="font-size:19px;color:rgba(255,255,255,.9)">Diseño</div>
+      </div>
+      <div>
+        <div style="color:#D6F400;font-size:17px;font-weight:500;margin-bottom:14px">Alcance</div>
+        <div style="font-size:19px;color:rgba(255,255,255,.9);max-width:24ch">Diseño editorial · Maquetación bilingüe · Edición e ilustración</div>
+      </div>
+    </div>
+  </section>
+
+  <div style="overflow:hidden;border-bottom:1px solid rgba(255,255,255,.1);padding:22px 0">
+    <div style="display:flex;width:max-content;animation:sj-marquee 32s linear infinite;gap:0">
+      <div style="display:flex;gap:0;font-size:clamp(22px,2.4vw,34px);font-weight:700;letter-spacing:-.02em;color:rgba(255,255,255,.22);white-space:nowrap">
+        <span style="padding:0 28px">Punta de León</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">La Gruta</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">La Virgen</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">Los Callejones</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">La Laja</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">El Anfiteatro</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">Las Columnas</span><span style="padding:0 28px;color:#D6F400">·</span>
+      </div>
+      <div style="display:flex;gap:0;font-size:clamp(22px,2.4vw,34px);font-weight:700;letter-spacing:-.02em;color:rgba(255,255,255,.22);white-space:nowrap">
+        <span style="padding:0 28px">Punta de León</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">La Gruta</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">La Virgen</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">Los Callejones</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">La Laja</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">El Anfiteatro</span><span style="padding:0 28px;color:#D6F400">·</span>
+        <span style="padding:0 28px">Las Columnas</span><span style="padding:0 28px;color:#D6F400">·</span>
+      </div>
+    </div>
+  </div>
+
+  <section style="padding:clamp(64px,9vw,140px) clamp(24px,6vw,120px);display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(32px,5vw,80px)">
+    <div style="color:#D6F400;font-size:17px;font-weight:600" data-reveal="1">Editorial</div>
+    <div style="display:flex;flex-direction:column;gap:32px;max-width:22ch;font-size:clamp(26px,2.6vw,42px);line-height:1.22;letter-spacing:-.02em" data-reveal="1">
+      <p style="margin:0">Diseño y edición de la Guía de Inmersiones de San Javier: 7 inmersiones, 65 páginas, hecha desde cero.</p>
+      <p style="margin:0;color:rgba(255,255,255,.72);font-size:19px;line-height:1.55;max-width:46ch;letter-spacing:0">Partimos de un folio en blanco: rejilla, tipografía, sistema de color, portadillas de cada inmersión, tablas de datos técnicos, iconografía, ilustraciones batimétricas y maquetación bilingüe español–inglés. Todo el material fotográfico y de vídeo es propio, capturado en Isla Grosa, El Farallón y La Laja.</p>
+    </div>
+  </section>
+
+  <section style="padding:0 clamp(24px,6vw,120px) clamp(56px,7vw,110px)">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.1);padding-top:36px;margin-bottom:clamp(28px,3vw,44px)">
+      <h2 style="margin:0;font-size:clamp(32px,4.6vw,72px);font-weight:800;letter-spacing:-.03em;line-height:1" data-reveal="1">El sistema editorial</h2>
+      <div style="color:rgba(255,255,255,.5);font-size:17px">Arrastra para recorrer las páginas &#8594;</div>
+    </div>
+    <div class="sj-strip" style="display:flex;gap:clamp(12px,1.5vw,24px);overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:18px">
+      <sc-for list="{{ spreads }}" as="sp" hint-placeholder-count="5">
+        <figure style="margin:0;flex:0 0 auto;width:min(78vw,900px);scroll-snap-align:center;cursor:zoom-in" onClick="{{ sp.open }}">
+          <img src="{{ sp.src }}" alt="{{ sp.label }}" style="display:block;width:100%;height:auto;background:#111;border:1px solid rgba(255,255,255,.08)" />
+          <figcaption style="padding-top:14px;font-size:16px;color:rgba(255,255,255,.6)">{{ sp.label }}</figcaption>
+        </figure>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding:0 clamp(24px,6vw,120px) clamp(64px,9vw,120px)">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.1);padding-top:36px;margin-bottom:clamp(28px,3vw,44px)">
+      <h2 style="margin:0;font-size:clamp(32px,4.6vw,72px);font-weight:800;letter-spacing:-.03em;line-height:1" data-reveal="1">Las 7 inmersiones</h2>
+      <div style="color:rgba(255,255,255,.5);font-size:17px">Elige una inmersión</div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:clamp(28px,3vw,44px)">
+      <sc-for list="{{ dives }}" as="d" hint-placeholder-count="7">
+        <button type="button" onClick="{{ d.select }}" style="{{ d.chipStyle }}">
+          <span style="opacity:.55;font-weight:600">{{ d.num }}</span>
+          <span>{{ d.name }}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(24px,4vw,64px);align-items:start">
+      <div>
+        <div style="font-size:15px;font-weight:600;letter-spacing:.14em;color:#D6F400;margin-bottom:14px">{{ activeDive.kicker }}</div>
+        <h3 style="margin:0 0 20px;font-size:clamp(28px,3.4vw,54px);font-weight:800;letter-spacing:-.03em;line-height:1.02">{{ activeDive.name }}</h3>
+        <p style="margin:0 0 26px;font-size:19px;line-height:1.55;color:rgba(255,255,255,.75);max-width:46ch">{{ activeDive.body }}</p>
+        <div style="display:flex;gap:36px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.12);padding-top:22px">
+          <div>
+            <div style="font-size:15px;color:rgba(255,255,255,.5);margin-bottom:6px">Profundidad</div>
+            <div style="font-size:22px;font-weight:700">{{ activeDive.depth }}</div>
+          </div>
+          <div>
+            <div style="font-size:15px;color:rgba(255,255,255,.5);margin-bottom:6px">Nivel</div>
+            <div style="font-size:22px;font-weight:700">{{ activeDive.level }}</div>
+          </div>
+          <div>
+            <div style="font-size:15px;color:rgba(255,255,255,.5);margin-bottom:6px">Páginas de la guía</div>
+            <div style="font-size:22px;font-weight:700">{{ activeDive.pages }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:clamp(12px,1.5vw,20px)">
+        <sc-for list="{{ activeDive.images }}" as="im" hint-placeholder-count="2">
+          <img src="{{ im.src }}" alt="{{ im.alt }}" onClick="{{ im.open }}" style="display:block;width:100%;height:auto;border:1px solid rgba(255,255,255,.08);background:#111;cursor:zoom-in;transition:transform .5s ease,opacity .5s ease" style-hover="transform:scale(1.012);opacity:.94" />
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:0 clamp(24px,6vw,120px) clamp(64px,9vw,120px)">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.1);padding-top:36px;margin-bottom:clamp(32px,4vw,56px)">
+      <h2 style="margin:0;font-size:clamp(32px,4.6vw,72px);font-weight:800;letter-spacing:-.03em;line-height:1" data-reveal="1">Cómo hicimos la guía</h2>
+      <div style="color:rgba(255,255,255,.5);font-size:17px">Pulsa cada fase</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(24px,4vw,64px);align-items:start">
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ steps }}" as="step" hint-placeholder-count="4">
+          <button type="button" onClick="{{ step.select }}" style="{{ step.tabStyle }}">
+            <span style="font-size:15px;font-weight:600;letter-spacing:.14em;opacity:.55">{{ step.num }}</span>
+            <span style="font-size:clamp(20px,2vw,28px);font-weight:700;letter-spacing:-.02em;text-align:left">{{ step.title }}</span>
+          </button>
+        </sc-for>
+        <p style="margin:28px 0 0;font-size:19px;line-height:1.55;color:rgba(255,255,255,.75);max-width:44ch">{{ activeStepBody }}</p>
+      </div>
+
+      <div style="position:relative;width:100%;overflow:hidden;background:#111;border:1px solid rgba(255,255,255,.08)">
+        <img src="{{ activeStepImage }}" alt="{{ activeStepAlt }}" onClick="{{ openStepImage }}" style="display:block;width:100%;height:auto;cursor:zoom-in" />
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:0 clamp(24px,6vw,120px) clamp(80px,10vw,160px)">
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:clamp(40px,5vw,72px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:32px">
+      <div>
+        <div style="color:#D6F400;font-size:17px;font-weight:600;margin-bottom:18px">Siguiente proyecto</div>
+        <a href="#proyectos" style="font-size:clamp(34px,5vw,80px);font-weight:800;letter-spacing:-.03em;color:#FFFFFF;line-height:1" style-hover="color:#D6F400">Ver todos los proyectos &#8594;</a>
+      </div>
+      <a href="#contacto" style="border:1px solid #D6F400;color:#D6F400;padding:16px 30px;font-size:18px;font-weight:600" style-hover="background:#D6F400;color:#0A0A0A">Cuéntanos tu proyecto</a>
+    </div>
+  </section>
+
+  <sc-if value="{{ lightboxOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:80;background:rgba(6,6,6,.96);display:flex;flex-direction:column;padding:20px clamp(16px,3vw,48px)" onClick="{{ closeLightbox }}">
+      <div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.7);font-size:16px;padding-bottom:14px">
+        <span>{{ lightboxLabel }}</span>
+        <button type="button" onClick="{{ closeLightbox }}" style="background:transparent;border:0;color:#D6F400;font-size:24px;cursor:pointer;font-family:inherit">&#10005;</button>
+      </div>
+      <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:clamp(10px,2vw,28px)">
+        <button type="button" onClick="{{ prevLightbox }}" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#FFFFFF;width:48px;height:48px;font-size:20px;cursor:pointer;flex:0 0 auto;font-family:inherit" style-hover="border-color:#D6F400;color:#D6F400">&#8592;</button>
+        <img src="{{ lightboxSrc }}" alt="{{ lightboxLabel }}" style="max-width:100%;max-height:100%;object-fit:contain" />
+        <button type="button" onClick="{{ nextLightbox }}" style="background:transparent;border:1px solid rgba(255,255,255,.25);color:#FFFFFF;width:48px;height:48px;font-size:20px;cursor:pointer;flex:0 0 auto;font-family:inherit" style-hover="border-color:#D6F400;color:#D6F400">&#8594;</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;columnasGaleria&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;min&quot;:2,&quot;max&quot;:4,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Galería&quot;}}">
+const PAGES = [
+  { src: "uploads/IMG_0119.jpg", label: "Portada y créditos" },
+  { src: "uploads/IMG_0120.jpg", label: "Autores" },
+  { src: "uploads/IMG_0121.jpg", label: "San Javier, destino turístico" },
+  { src: "uploads/IMG_0122.jpg", label: "Zona de inmersiones · Isla Grosa y El Farallón" },
+  { src: "uploads/IMG_0123.jpg", label: "Mapa de inmersiones y tabla técnica" },
+  { src: "uploads/IMG_0124.jpg", label: "Buceo responsable y sostenible" },
+  { src: "uploads/IMG_0125.jpg", label: "Índice de las 7 inmersiones · portadilla Punta de León" },
+  { src: "uploads/IMG_0126.PNG", label: "Punta de León · el arco de Isla Grosa" },
+  { src: "uploads/IMG_0127.jpg", label: "La Gruta · buceando entre cormoranes" },
+  { src: "uploads/IMG_0128.jpg", label: "La Virgen · el pulmón de San Javier" },
+  { src: "uploads/IMG_0129.jpg", label: "El Gran Cañón · la vida oculta de las praderas" },
+  { src: "uploads/IMG_0130.jpg", label: "Los Callejones · explosión de color" },
+  { src: "uploads/IMG_0131.jpg", label: "Los Callejones · corales y nudibranquios" },
+  { src: "uploads/IMG_0132.jpg", label: "Los Callejones · abanicos de vida" },
+  { src: "uploads/IMG_0133.jpg", label: "La Laja · entre romanos y fenicios" },
+  { src: "uploads/IMG_0134.jpg", label: "La Laja · ilustración batimétrica" },
+  { src: "uploads/IMG_0135.jpg", label: "El Anfiteatro · formaciones de ensueño" },
+  { src: "uploads/IMG_0136.jpg", label: "El Anfiteatro · ilustración y barracudas" },
+  { src: "uploads/IMG_0137.jpg", label: "Grandes serránidos y pelágicos" },
+  { src: "uploads/IMG_0138.jpg", label: "Las Columnas · naufragios enigmáticos" },
+  { src: "uploads/IMG_0139.jpg", label: "Las Columnas · ilustración y pecio" },
+  { src: "uploads/IMG_0140.jpg", label: "Señales visuales de seguridad" },
+  { src: "uploads/IMG_0141.jpg", label: "Cubierta · 7 puntos de buceo" },
+  { src: "uploads/IMG_0142.jpg", label: "Punta de León · el arco de Isla Grosa" }
+];
+
+const DIVES = [
+  { num: "01", name: "Punta de León", kicker: "EL ARCO DE ISLA GROSA", depth: "0–20 m", level: "Básico", pages: "18–23",
+    body: "El arco que atraviesa Isla Grosa: 120 metros de recorrido y 6 metros de profundidad máxima. La portadilla se resolvió a sangre, con la fotografía ocupando la doble página y el nombre de la inmersión en vertical sobre banda crema.", idx: [23] },
+  { num: "02", name: "La Gruta", kicker: "BUCEANDO ENTRE CORMORANES", depth: "0–14 m", level: "Avanzado", pages: "24–29",
+    body: "La colonia de cormorán moñudo de la cara este de Isla Grosa da nombre y contenido a esta inmersión. Texto científico revisado por biólogo, siempre en dos columnas: castellano arriba, inglés abajo, en menor cuerpo.", idx: [8] },
+  { num: "03", name: "La Virgen", kicker: "EL PULMÓN DE SAN JAVIER", depth: "0–18 m", level: "Básico", pages: "30–36",
+    body: "Las praderas de Posidonia y Cymodocea como eje del capítulo. Aquí entran las ilustraciones batimétricas: una vista mitad aire, mitad agua que sitúa al buceador antes de sumergirse, con su tabla de datos y QR al vídeo.", idx: [9] },
+  { num: "04", name: "Los Callejones", kicker: "EXPLOSIÓN DE COLOR", depth: "0–12 m", level: "Básico", pages: "37–43",
+    body: "El capítulo más cromático de la guía: comunidades esciáfilas, gorgonias y nudibranquios. Las fotos macro se imprimen a sangre y a página completa para que el color mande sobre el texto.", idx: [11] },
+  { num: "05", name: "La Laja", kicker: "ENTRE ROMANOS Y FENICIOS", depth: "2–20 m", level: "Básico", pages: "44–49",
+    body: "El Bajo de la Campana y el pecio fenicio más grande hallado en el Mediterráneo. Historia y biología comparten página con recortes tipo etiqueta rasgada para nombrar especies.", idx: [14] },
+  { num: "06", name: "El Anfiteatro", kicker: "FORMACIONES DE ENSUEÑO", depth: "14–17 m", level: "Básico", pages: "50–55",
+    body: "Un afloramiento rocoso en medio de la pradera. Fichas de grandes serránidos y pelágicos sobre fondo papel, con los peces recortados para poder identificarlos de un vistazo.", idx: [16] },
+  { num: "07", name: "Las Columnas", kicker: "NAUFRAGIOS ENIGMÁTICOS", depth: "24–27 m", level: "Avanzado", pages: "56–61",
+    body: "La inmersión más profunda de la guía, sobre la carga de un barco a 27 metros. Cierra el bloque de inmersiones y enlaza con el capítulo de seguridad y señales visuales.", idx: [19] }
+];
+
+const STEPS = [
+  { num: "01", title: "Estructura", body: "Definimos el recorrido de las 65 páginas: introducción y territorio, zona de inmersiones, mapa general, buceo responsable, las 7 inmersiones y seguridad. Cada bloque tiene su propio pie de página con jerarquía y numeración.", idx: 4 },
+  { num: "02", title: "Sistema visual", body: "Rejilla a dos y tres columnas, azul institucional sobre papel, crema para portadillas y una cursiva para los subtítulos. Iconografía propia para nivel, recomendaciones, paisaje y fauna, más un código de color para las autorizaciones de la CARM.", idx: 6 },
+  { num: "03", title: "Fotografía e ilustración", body: "Todo el material es propio: fotografía y vídeo submarino en Isla Grosa, El Farallón y La Laja, más ilustraciones batimétricas dibujadas para cada punto de buceo y QR a los vídeos de cada inmersión.", idx: 15 },
+  { num: "04", title: "Edición bilingüe", body: "Maquetación en español e inglés con revisión científica de un biólogo. Cerramos con el bloque de seguridad —señales visuales fotografiadas expresamente— y la preparación de artes finales para imprenta y para digital.", idx: 21 }
+];
+
+class Component extends DCLogic {
+  state = { dive: 0, step: 0, lightbox: null };
+
+  componentDidMount() {
+    this.seen = new WeakSet();
+    this.onScroll = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      if (this.progressEl) this.progressEl.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + "%";
+      if (this.heroEl) this.heroEl.style.transform = "translate3d(0," + (window.scrollY * 0.18) + "px,0)";
+    };
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+    this.onKey = (e) => {
+      if (this.state.lightbox === null) return;
+      if (e.key === "Escape") this.setState({ lightbox: null });
+      if (e.key === "ArrowRight") this.shift(1);
+      if (e.key === "ArrowLeft") this.shift(-1);
+    };
+    window.addEventListener("keydown", this.onKey);
+    this.io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          en.target.style.opacity = "1";
+          en.target.style.transform = "none";
+          this.io.unobserve(en.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    this.observe();
+  }
+
+  componentDidUpdate() { this.observe(); }
+
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.onScroll);
+    window.removeEventListener("keydown", this.onKey);
+    if (this.io) this.io.disconnect();
+  }
+
+  observe() {
+    if (!this.io) return;
+    document.querySelectorAll("[data-reveal]").forEach((el) => {
+      if (this.seen.has(el)) return;
+      this.seen.add(el);
+      el.style.opacity = "0";
+      el.style.transform = "translateY(26px)";
+      el.style.transition = "opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1)";
+      this.io.observe(el);
+    });
+  }
+
+  shift(d) {
+    const n = PAGES.length;
+    this.setState((s) => ({ lightbox: ((s.lightbox + d) % n + n) % n }));
+  }
+
+  renderVals() {
+    const cols = Math.max(2, Math.min(4, parseInt(this.props.columnasGaleria ?? 3, 10) || 3));
+    const open = (i) => () => this.setState({ lightbox: i });
+    const activeDive = DIVES[this.state.dive];
+    const step = STEPS[this.state.step];
+
+    return {
+      progressRef: (el) => { this.progressEl = el; },
+      heroRef: (el) => { this.heroEl = el; },
+
+      spreads: [0, 1, 2, 3, 5].map((i) => ({ src: PAGES[i].src, label: PAGES[i].label, open: open(i) })),
+
+      dives: DIVES.map((d, i) => ({
+        num: d.num,
+        name: d.name,
+        select: () => this.setState({ dive: i }),
+        chipStyle: [
+          "display:flex;align-items:center;gap:10px;padding:12px 20px;font-size:17px;font-weight:500;cursor:pointer;font-family:inherit",
+          "border:1px solid " + (i === this.state.dive ? "#D6F400" : "rgba(255,255,255,.18)"),
+          "background:" + (i === this.state.dive ? "#D6F400" : "transparent"),
+          "color:" + (i === this.state.dive ? "#0A0A0A" : "#FFFFFF"),
+          "transition:border-color .2s ease,background .2s ease,color .2s ease"
+        ].join(";")
+      })),
+
+      activeDive: {
+        name: activeDive.name,
+        kicker: activeDive.kicker,
+        body: activeDive.body,
+        depth: activeDive.depth,
+        level: activeDive.level,
+        pages: activeDive.pages,
+        images: activeDive.idx.map((i) => ({ src: PAGES[i].src, alt: PAGES[i].label, open: open(i) }))
+      },
+
+      steps: STEPS.map((s, i) => ({
+        num: s.num,
+        title: s.title,
+        select: () => this.setState({ step: i }),
+        tabStyle: [
+          "display:flex;flex-direction:column;gap:6px;align-items:flex-start;width:100%;cursor:pointer",
+          "background:transparent;border:0;border-top:1px solid rgba(255,255,255,.12);padding:22px 0;font-family:inherit",
+          "transition:opacity .25s ease",
+          i === this.state.step ? "color:#D6F400;opacity:1" : "color:#FFFFFF;opacity:.5"
+        ].join(";")
+      })),
+      activeStepBody: step.body,
+      activeStepImage: PAGES[step.idx].src,
+      activeStepAlt: PAGES[step.idx].label,
+      openStepImage: open(step.idx),
+
+      photos: PAGES.map((p, i) => ({ src: p.src, label: p.label, open: open(i) })),
+      galleryGridStyle: "display:grid;grid-auto-flow:dense;grid-template-columns:repeat(" + cols + ",1fr);gap:clamp(10px,1.2vw,20px)",
+
+      lightboxOpen: this.state.lightbox !== null,
+      lightboxSrc: this.state.lightbox !== null ? PAGES[this.state.lightbox].src : "",
+      lightboxLabel: this.state.lightbox !== null ? PAGES[this.state.lightbox].label : "",
+      closeLightbox: () => this.setState({ lightbox: null }),
+      prevLightbox: (e) => { e.stopPropagation(); this.shift(-1); },
+      nextLightbox: (e) => { e.stopPropagation(); this.shift(1); }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

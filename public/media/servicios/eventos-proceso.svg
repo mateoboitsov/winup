@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 220" fill="none" role="img" aria-label="Proceso de trabajo en eventos">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c8ff00" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#c8ff00" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="220" rx="16" fill="#111"/>
+  <rect width="1200" height="220" rx="16" fill="url(#g)"/>
+  <g font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#fff" text-anchor="middle">
+    <rect x="24" y="70" width="200" height="80" rx="10" stroke="#c8ff00" stroke-width="2" fill="#1a1a1a"/>
+    <text x="124" y="105">Brief</text>
+    <text x="124" y="128" font-size="12" fill="#aaa" font-weight="400">Objetivos y mensaje</text>
+
+    <path d="M224 110h48" stroke="#c8ff00" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <rect x="272" y="70" width="200" height="80" rx="10" stroke="#c8ff00" stroke-width="2" fill="#1a1a1a"/>
+    <text x="372" y="105">Planificación</text>
+    <text x="372" y="128" font-size="12" fill="#aaa" font-weight="400">Calendario y piezas</text>
+
+    <path d="M472 110h48" stroke="#c8ff00" stroke-width="2"/>
+
+    <rect x="520" y="70" width="200" height="80" rx="10" stroke="#c8ff00" stroke-width="2" fill="#1a1a1a"/>
+    <text x="620" y="105">Día del evento</text>
+    <text x="620" y="128" font-size="12" fill="#aaa" font-weight="400">Cobertura en directo</text>
+
+    <path d="M720 110h48" stroke="#c8ff00" stroke-width="2"/>
+
+    <rect x="768" y="70" width="200" height="80" rx="10" stroke="#c8ff00" stroke-width="2" fill="#1a1a1a"/>
+    <text x="868" y="105">En caliente</text>
+    <text x="868" y="128" font-size="12" fill="#aaa" font-weight="400">Stories y publicación</text>
+
+    <path d="M968 110h48" stroke="#c8ff00" stroke-width="2"/>
+
+    <rect x="1016" y="70" width="160" height="80" rx="10" stroke="#c8ff00" stroke-width="2" fill="#1a1a1a"/>
+    <text x="1096" y="105">Recap</text>
+    <text x="1096" y="128" font-size="12" fill="#aaa" font-weight="400">Pieza editada</text>
+  </g>
+</svg>

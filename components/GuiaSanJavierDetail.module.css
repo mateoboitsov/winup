@@ -1,0 +1,341 @@
+.root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-soft);
+  overflow-x: hidden;
+}
+
+.heroImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.heroContent {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(2rem, 6vw, 5rem);
+  padding: 0 clamp(1.5rem, 5vw, 4.5rem);
+}
+
+.heroNote {
+  margin: 1rem 0 0;
+  max-width: 36rem;
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  color: var(--fg-muted);
+}
+
+.diveIndex {
+  margin: 0;
+  padding: 0 clamp(1.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3rem);
+  max-width: 1200px;
+  margin-inline: auto;
+  font-size: clamp(0.9rem, 1.3vw, 1rem);
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.spreadTrack {
+  align-items: flex-start;
+}
+
+.spreadSlide {
+  width: min(78vw, 52rem);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.spreadFigure {
+  margin: 0;
+  width: 100%;
+}
+
+.spreadFigure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--radius-btn) + 4px);
+  background: var(--bg-elevated);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.32);
+}
+
+.spreadFigure figcaption {
+  padding-top: 0.85rem;
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  line-height: 1.4;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: left;
+}
+
+.block {
+  padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 5vw, 4.5rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.95rem;
+  font: inherit;
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-btn);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.chip:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.chipActive {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.chipNum {
+  opacity: 0.55;
+}
+
+.diveGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
+}
+
+.diveKicker {
+  color: var(--accent) !important;
+  margin-bottom: 0.65rem;
+}
+
+.diveName {
+  margin: 0 0 1rem;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 1.05;
+}
+
+.diveBody {
+  margin: 0 0 1.5rem;
+  max-width: 42rem;
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  line-height: 1.55;
+  letter-spacing: -0.03em;
+  color: var(--fg-muted);
+}
+
+.diveStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  margin: 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.diveStats div {
+  min-width: 5rem;
+}
+
+.diveStats dt {
+  margin: 0 0 0.35rem;
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.diveStats dd {
+  margin: 0;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.diveImages {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.diveImageBtn,
+.stepImageBtn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-btn);
+  background: var(--bg-elevated);
+  cursor: zoom-in;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.diveImageBtn:hover,
+.stepImageBtn:hover {
+  border-color: rgba(200, 255, 0, 0.35);
+}
+
+.diveImageBtn img,
+.stepImageBtn img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
+}
+
+.stepBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+  width: 100%;
+  padding: 1.1rem 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.stepBtnActive {
+  color: #fff;
+}
+
+.stepNum {
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+.stepTitle {
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+
+.stepBody {
+  margin: 1.25rem 0 0;
+  max-width: 42rem;
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  line-height: 1.55;
+  letter-spacing: -0.03em;
+  color: var(--fg-muted);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.revealVisible {
+  opacity: 1;
+  transform: none;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 3rem);
+  background: rgba(5, 5, 5, 0.96);
+}
+
+.lightboxHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.85rem;
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.lightboxClose {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.lightboxBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 2vw, 1.5rem);
+}
+
+.lightboxNav {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  font: inherit;
+  color: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.lightboxNav:hover {
+  border-color: var(--accent);
+  background: rgba(200, 255, 0, 0.1);
+}
+
+.lightboxImg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
