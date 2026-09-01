@@ -4,6 +4,7 @@ import "./globals.css";
 import SiteNav from "@/components/SiteNav";
 import LenisSmoothScroll from "@/components/LenisSmoothScroll";
 import ConversionBot from "@/components/ConversionBot";
+import NetlifyIdentity from "@/components/NetlifyIdentity";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
         <LenisSmoothScroll />
         {children}
         <ConversionBot />
+        <NetlifyIdentity />
       </body>
     </html>
   );

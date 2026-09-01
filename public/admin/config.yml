@@ -7,8 +7,8 @@ public_folder: "/media/equipo"
 
 locale: "es"
 
-site_url: https://winup.netlify.app
-display_url: https://winup.netlify.app
+site_url: https://fascinating-cajeta-4f56b3.netlify.app
+display_url: https://fascinating-cajeta-4f56b3.netlify.app
 
 collections:
   - name: "about"
